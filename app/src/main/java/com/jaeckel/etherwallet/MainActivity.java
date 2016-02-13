@@ -14,7 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import com.example.GethConnector;
+import com.jaeckel.geth.GethConnector;
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
       @Override
       public void onClick(View view) {
 
-        Log.d("GETHW", "simpleCall()");
+        Log.d("GETHW", "netPeerCount()");
         simpleCall();
 
         Snackbar.make(view, "SimpleCall...", Snackbar.LENGTH_LONG)
@@ -60,8 +60,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
       public void run() {
         while (true) {
           try {
-            System.out.println("GethConnector.simpleCall()");
-            GethConnector.simpleCall();
+            System.out.println("GethConnector.netPeerCount()");
+            GethConnector.netPeerCount();
+            System.out.println("GethConnector.ethSyncing  ()");
+            GethConnector.ethSyncing();
             SystemClock.sleep(5000);
           } catch (IOException e) {
             Log.e("ETHW", "FAILURE: ", e);
