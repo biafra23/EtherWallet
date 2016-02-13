@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
           try {
             System.out.println("GethConnector.simpleCall()");
             GethConnector.simpleCall();
-            SystemClock.sleep(2000);
+            SystemClock.sleep(5000);
           } catch (IOException e) {
             Log.e("ETHW", "FAILURE: ", e);
             e.printStackTrace();
