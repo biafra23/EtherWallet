@@ -2,6 +2,7 @@ package com.jaeckel.etherwallet;
 
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -14,8 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import com.jaeckel.geth.GethConnector;
 import com.github.ethereum.go_ethereum.cmd.Geth;
+import com.jaeckel.geth.GethConnector;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -23,20 +24,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    getChainDataDir();
+
     setContentView(R.layout.activity_main);
     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
     Log.d("GETHW", "initGeth()");
     initGeth();
+    startJSONReporting();
 
     FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
 
-        Log.d("GETHW", "netPeerCount()");
-        simpleCall();
+        //TODO: create account
+        //Geth.doAccountNew(getChainDataDir(), "password");
+        Geth.run("--datadir=" + getChainDataDir() + " account list");
+        //Geth.run("account list");
+
+        //Log.d("GETHW", "netPeerCount()");
+        //startJSONReporting();
 
         Snackbar.make(view, "SimpleCall...", Snackbar.LENGTH_LONG)
             .setAction("Action", null)
@@ -54,7 +63,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
   }
 
-  private void simpleCall() {
+  @NonNull
+  private String getChainDataDir() {
+    Log.d("GETHW", "absolutePath: " + getFilesDir().getAbsolutePath());
+    return getFilesDir().getAbsolutePath();
+  }
+
+  private void startJSONReporting() {
     new Thread(new Runnable() {
       @Override
       public void run() {
@@ -62,12 +77,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
           try {
             System.out.println("GethConnector.netPeerCount()");
             GethConnector.netPeerCount();
-            System.out.println("GethConnector.ethSyncing  ()");
+            System.out.println("GethConnector.ethSyncing()");
             GethConnector.ethSyncing();
+            System.out.println("GethConnector.ethAccounts()");
+            GethConnector.ethAccounts();
             SystemClock.sleep(5000);
           } catch (IOException e) {
             Log.e("ETHW", "FAILURE: ", e);
-            e.printStackTrace();
+            SystemClock.sleep(5000);
+            //e.printStackTrace();
           }
         }
       }
@@ -79,11 +97,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     new Thread(new Runnable() {
       public void run() {
-        String absolutePath = getFilesDir().getAbsolutePath();
-        Log.d("GETHW", "absolutePath: " + absolutePath); //data/data/org.ethereum.droidwallet/files
-        Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + absolutePath);
+
+        Log.d("GETHW", "absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
+        int foo = Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+        //Never reached
       }
     }).start();
+
+    SystemClock.sleep(1000);
+    System.out.println("Geth.doUnlockAccount()... right password");
+
+    Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "password", "1000ms");
+    System.out.println("Geth.doUnlockAccount()... wrong password");
+    Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "wrong", "1000ms");
+    System.out.println("...done.");
 
   }
 

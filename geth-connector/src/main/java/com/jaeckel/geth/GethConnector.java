@@ -15,6 +15,7 @@ public class GethConnector {
   private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
   private static final String METHOD_ETH_SYNCING = "eth_syncing";
   private static final String JSONRPC_ENDPOINT = "http://localhost:8545/";
+  private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
   private static Integer requestId = 1;
 
   public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -46,6 +47,44 @@ public class GethConnector {
     System.out.println("Response: " + result);
 
     return result;
+  }
+
+  public static String ethAccounts() throws IOException {
+
+    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
+        .build())
+        .execute();
+
+    String result = response.body()
+        .string();
+    System.out.println("Response: " + result);
+
+    return result;
+  }
+
+  public static String sendTransaction(String from, String to, long wei) throws IOException {
+
+    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+        .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
+        .build())
+        .execute();
+
+    String result = response.body()
+        .string();
+    System.out.println("Response: " + result);
+
+    return result;
+
+  }
+
+  public static String createTxRequest(String from, String to, long wei) {
+    Map<String, Object> params = new HashMap<>();
+
+    Integer id = requestId++;
+    JSONRPC2Request reqOut = new JSONRPC2Request(METHOD_ETH_ACCOUNTS, params, id);
+    System.out.println("Request: " + reqOut.toString());
+    return reqOut.toString();
   }
 
   public static String createRequest(String method) {
