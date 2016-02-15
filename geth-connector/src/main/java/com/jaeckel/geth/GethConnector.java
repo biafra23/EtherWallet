@@ -1,9 +1,13 @@
 package com.jaeckel.geth;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -12,86 +16,100 @@ import okhttp3.Response;
 
 public class GethConnector {
 
-  private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
-  private static final String METHOD_ETH_SYNCING = "eth_syncing";
-  private static final String JSONRPC_ENDPOINT = "http://localhost:8545/";
-  private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
-  private static Integer requestId = 1;
+    private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
+    private static final String METHOD_ETH_SYNCING = "eth_syncing";
+    private static final String JSONRPC_ENDPOINT = "http://localhost:8545/";
+    private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
+    private static Integer requestId = 1;
 
-  public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-  private static OkHttpClient httpClient = new OkHttpClient();
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static OkHttpClient httpClient = new OkHttpClient();
 
-  public static String netPeerCount() throws IOException {
+    public static String netPeerCount() throws IOException {
 
-    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
-        .post(RequestBody.create(JSON, createRequest(METHOD_NET_PEER_COUNT)))
-        .build())
-        .execute();
+        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createRequest(METHOD_NET_PEER_COUNT)))
+                                                       .build()).execute();
+        String jsonString = response.body().string();
+        try {
+            JSONRPC2Response jsonRpc2Response = JSONRPC2Response.parse(jsonString);
 
-    String result = response.body()
-        .string();
-    System.out.println("Response: " + result);
+            if(jsonRpc2Response.indicatesSuccess()) {
+                return jsonRpc2Response.getResult();
+            } else {
+                return jsonRpc2Response.getError();
+            }
+        } catch (JSONRPC2ParseException e) {
+            System.out.println("JSONRPC2ParseException");
+            e.printStackTrace();
+        }
+        // deserialize response
 
-    return result;
-  }
+        System.out.println("Response: " + jsonString);
 
-  public static String ethSyncing() throws IOException {
+        //return response
+        return jsonString;
+    }
 
-    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
-        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_SYNCING)))
-        .build())
-        .execute();
+    public static String ethSyncing() throws IOException {
 
-    String result = response.body()
-        .string();
-    System.out.println("Response: " + result);
+        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createRequest(METHOD_ETH_SYNCING)))
+                                                       .build())
+                .execute();
 
-    return result;
-  }
+        String result = response.body()
+                .string();
+        System.out.println("Response: " + result);
 
-  public static String ethAccounts() throws IOException {
+        return result;
+    }
 
-    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
-        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
-        .build())
-        .execute();
+    public static String ethAccounts() throws IOException {
 
-    String result = response.body()
-        .string();
-    System.out.println("Response: " + result);
+        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
+                                                       .build())
+                .execute();
 
-    return result;
-  }
+        String result = response.body()
+                .string();
+        System.out.println("Response: " + result);
 
-  public static String sendTransaction(String from, String to, long wei) throws IOException {
+        return result;
+    }
 
-    Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
-        .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
-        .build())
-        .execute();
+    public static String sendTransaction(String from, String to, long wei) throws IOException {
 
-    String result = response.body()
-        .string();
-    System.out.println("Response: " + result);
+        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
+                                                       .build())
+                .execute();
 
-    return result;
+        String result = response.body()
+                .string();
+        System.out.println("Response: " + result);
 
-  }
+        return result;
 
-  public static String createTxRequest(String from, String to, long wei) {
-    Map<String, Object> params = new HashMap<>();
+    }
 
-    Integer id = requestId++;
-    JSONRPC2Request reqOut = new JSONRPC2Request(METHOD_ETH_ACCOUNTS, params, id);
-    System.out.println("Request: " + reqOut.toString());
-    return reqOut.toString();
-  }
+    public static String createTxRequest(String from, String to, long wei) {
+        Map<String, Object> params = new HashMap<>();
 
-  public static String createRequest(String method) {
-    Map<String, Object> params = new HashMap<>();
-    Integer id = requestId++;
-    JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
-    System.out.println("Request: " + reqOut.toString());
-    return reqOut.toString();
-  }
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(METHOD_ETH_ACCOUNTS, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
+
+    public static String createRequest(String method) {
+        Map<String, Object> params = new HashMap<>();
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
+
+    class Callback<T extends >
 }
