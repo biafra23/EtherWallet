@@ -18,15 +18,19 @@ import android.view.View;
 
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.GethConnector;
+import com.jaeckel.geth.json.NetPeerCountResponse;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private GethConnector gethConnector;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getChainDataDir();
+        gethConnector = new GethConnector();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -78,11 +82,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 while (true) {
                     try {
                         System.out.println("GethConnector.netPeerCount()");
-                        GethConnector.netPeerCount();
-                        System.out.println("GethConnector.ethSyncing()");
-                        GethConnector.ethSyncing();
-                        System.out.println("GethConnector.ethAccounts()");
-                        GethConnector.ethAccounts();
+                        gethConnector.netPeerCount(new GethConnector.Callback<NetPeerCountResponse>() {
+                            @Override
+                            public void setResult(NetPeerCountResponse netPeerCountResponse) {
+                                Log.d("ETH", "netPeerCountResponse: " + netPeerCountResponse);
+                            }
+
+                            @Override
+                            public void setError(JSONRPC2Error error) {
+
+                            }
+                        });
+//                        System.out.println("GethConnector.ethSyncing()");
+//                        GethConnector.ethSyncing();
+//                        System.out.println("GethConnector.ethAccounts()");
+//                        GethConnector.ethAccounts();
                         SystemClock.sleep(5000);
                     } catch (IOException e) {
                         Log.e("ETHW", "FAILURE: ", e);
