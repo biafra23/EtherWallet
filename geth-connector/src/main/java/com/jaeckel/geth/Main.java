@@ -11,38 +11,38 @@ public class Main {
         System.out.println("main()");
 
         GethConnector gethConnector = new GethConnector();
-        gethConnector.netPeerCount(new GethConnector.Callback<NetPeerCountResponse>() {
+        gethConnector.netPeerCount(new EthereumJsonRpc.Callback<NetPeerCountResponse>() {
             @Override
-            public void setResult(NetPeerCountResponse netPeerCountResponse) {
+            public void onResult(NetPeerCountResponse netPeerCountResponse) {
                 System.out.println("netPeerCountResponse: " + netPeerCountResponse);
             }
 
             @Override
-            public void setError(JSONRPC2Error error) {
+            public void onError(JSONRPC2Error error) {
                 System.out.println("error: " + error);
             }
         });
 
-        gethConnector.ethSyncing(new GethConnector.Callback<EthSyncingResult>() {
+        gethConnector.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResult>() {
             @Override
-            public void setResult(EthSyncingResult ethSyncingResult) {
+            public void onResult(EthSyncingResult ethSyncingResult) {
                 System.out.println("EthSyncingResult: " + ethSyncingResult);
             }
 
             @Override
-            public void setError(JSONRPC2Error error) {
+            public void onError(JSONRPC2Error error) {
                 System.out.println("error: " + error);
             }
         });
 
-        gethConnector.ethAccounts(new GethConnector.Callback<EthAccountsResult>() {
+        gethConnector.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
             @Override
-            public void setResult(EthAccountsResult ethAccountsResult) {
+            public void onResult(EthAccountsResult ethAccountsResult) {
                 System.out.println("ethAccountsResult: " + ethAccountsResult);
             }
 
             @Override
-            public void setError(JSONRPC2Error error) {
+            public void onError(JSONRPC2Error error) {
                 System.out.println("error: " + error);
             }
         });

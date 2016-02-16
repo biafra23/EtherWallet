@@ -4,9 +4,9 @@ import com.jaeckel.geth.json.EthAccountsResult;
 import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.NetPeerCountResponse;
+import com.jaeckel.geth.json.SendTransactionresult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
@@ -21,7 +21,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class GethConnector {
+public class GethConnector implements EthereumJsonRpc{
 
     private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
     private static final String METHOD_ETH_SYNCING = "eth_syncing";
@@ -49,9 +49,9 @@ public class GethConnector {
 
                 JsonAdapter<NetPeerCountResponse> jsonAdapter = moshi.adapter(NetPeerCountResponse.class);
                 NetPeerCountResponse netPeerCountResponse = jsonAdapter.fromJson(jsonRpc2Response.toJSONString());
-                callback.setResult(netPeerCountResponse);
+                callback.onResult(netPeerCountResponse);
             } else {
-                callback.setError(jsonRpc2Response.getError());
+                callback.onError(jsonRpc2Response.getError());
             }
         } catch (JSONRPC2ParseException e) {
             System.out.println("JSONRPC2ParseException");
@@ -74,9 +74,9 @@ public class GethConnector {
             if (jsonRpc2Response.indicatesSuccess()) {
                 JsonAdapter<EthSyncingResult> jsonAdapter = moshi.adapter(EthSyncingResult.class);
                 EthSyncingResult ethSyncingResult = jsonAdapter.fromJson(jsonRpc2Response.toJSONString());
-                callback.setResult(ethSyncingResult);
+                callback.onResult(ethSyncingResult);
             } else {
-                callback.setError(jsonRpc2Response.getError());
+                callback.onError(jsonRpc2Response.getError());
             }
         } catch (JSONRPC2ParseException e) {
             System.out.println("JSONRPC2ParseException");
@@ -84,12 +84,11 @@ public class GethConnector {
         }
     }
 
-    public  void ethAccounts(Callback<EthAccountsResult> callback) throws IOException {
+    public void ethAccounts(Callback<EthAccountsResult> callback) throws IOException {
 
         Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
                                                        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
-                                                       .build())
-                .execute();
+                                                       .build()).execute();
 
         String jsonString = response.body().string();
         System.out.println("Response: " + jsonString);
@@ -99,11 +98,11 @@ public class GethConnector {
                 JsonAdapter<EthAccountsResult> jsonAdapter = moshi.adapter(EthAccountsResult.class);
                 EthAccountsResult ethAccountsResult = jsonAdapter.fromJson(jsonRpc2Response.toJSONString());
 
-                callback.setResult(ethAccountsResult);
+                callback.onResult(ethAccountsResult);
 
             } else {
 
-                callback.setError(jsonRpc2Response.getError());
+                callback.onError(jsonRpc2Response.getError());
             }
         } catch (JSONRPC2ParseException e) {
             System.out.println("JSONRPC2ParseException");
@@ -111,12 +110,13 @@ public class GethConnector {
         }
     }
 
-    public static String sendTransaction(String from, String to, long wei) throws IOException {
+    public static String sendTransaction(String from, String to, long wei, Callback<SendTransactionresult> callback) throws IOException {
 
-        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
-                                                       .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
-                                                       .build())
-                .execute();
+        Response response = httpClient.newCall(
+                new Request.Builder().url(JSONRPC_ENDPOINT)
+                        .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
+                        .build()
+        ).execute();
 
         String result = response.body()
                 .string();
@@ -143,10 +143,5 @@ public class GethConnector {
         return reqOut.toString();
     }
 
-    public interface Callback<T> {
 
-        void setResult(T t);
-
-        void setError(JSONRPC2Error error);
-    }
 }

@@ -1,0 +1,11 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3089,
+  "result": {
+    "currentBlock": "0xdb5f5",
+    "highestBlock": "0xf5664",
+    "knownStates": "0x0",
+    "pulledStates": "0x0",
+    "startingBlock": "0x862ba"
+  }
+}
