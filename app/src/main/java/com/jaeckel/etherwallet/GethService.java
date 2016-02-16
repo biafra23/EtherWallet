@@ -73,24 +73,46 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {
-        gethConnector.netPeerCount(callback);
+    public void netPeerCount(final Callback<NetPeerCountResponse> callback) throws IOException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    gethConnector.netPeerCount(callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
-    public void ethSyncing(Callback<EthSyncingResult> callback) throws IOException {
-        gethConnector.ethSyncing(callback);
+    public void ethSyncing(final Callback<EthSyncingResult> callback) throws IOException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    gethConnector.ethSyncing(callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
-    public void ethAccounts(Callback<EthAccountsResult> callback) {
-        try {
-            gethConnector.ethAccounts(callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void ethAccounts(final Callback<EthAccountsResult> callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    gethConnector.ethAccounts(callback);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
-
 
     public class MyBinder extends Binder {
         GethService getService() {
