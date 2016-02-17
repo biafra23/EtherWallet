@@ -73,7 +73,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void netPeerCount(final Callback<NetPeerCountResponse> callback) throws IOException {
+    public void netPeerCount(final Callback<NetPeerCountResponse> callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -87,7 +87,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethSyncing(final Callback<EthSyncingResult> callback) throws IOException {
+    public void ethSyncing(final Callback<EthSyncingResult> callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {

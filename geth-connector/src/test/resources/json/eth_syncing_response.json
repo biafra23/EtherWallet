@@ -4,8 +4,8 @@
   "result": {
     "currentBlock": "0xdb5f5",
     "highestBlock": "0xf5664",
-    "knownStates": "0x0",
-    "pulledStates": "0x0",
+    "knownStates": "0xa",
+    "pulledStates": "0xb",
     "startingBlock": "0x862ba"
   }
 }

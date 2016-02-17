@@ -13,7 +13,7 @@ public class EthSyncingResponse {
     @Hex
     long highestBlock;
     @Hex
-    long knownState;
+    long knownStates;
     @Hex
     long pulledStates;
     @Hex
@@ -24,7 +24,7 @@ public class EthSyncingResponse {
         return "EthSyncingResponse{" +
                 "currentBlock=" + currentBlock +
                 ", highestBlock=" + highestBlock +
-                ", knownState=" + knownState +
+                ", knownStates=" + knownStates +
                 ", pulledStates=" + pulledStates +
                 ", startingBlock=" + startingBlock +
                 '}';

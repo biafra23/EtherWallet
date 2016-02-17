@@ -22,6 +22,7 @@ import android.view.View;
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.json.EthAccountsResult;
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.novoda.notils.logger.simple.Log;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
@@ -68,6 +69,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 gethService.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
                     @Override
                     public void onResult(EthAccountsResult ethAccountsResult) {
+                        Log.d("onResult(): " + ethAccountsResult);
+                    }
+
+                    @Override
+                    public void onError(JSONRPC2Error error) {
+                        Log.d("onError(): " + error);
+
+                    }
+                });
+
+                gethService.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResult>() {
+                    @Override
+                    public void onResult(EthSyncingResult ethAccountsResult) {
                         Log.d("onResult(): " + ethAccountsResult);
                     }
 
