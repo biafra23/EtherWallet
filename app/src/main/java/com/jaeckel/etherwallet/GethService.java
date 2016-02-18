@@ -12,7 +12,7 @@ import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResult;
-import com.jaeckel.geth.json.EthSyncingResult;
+import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.novoda.notils.logger.simple.Log;
 
@@ -87,7 +87,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethSyncing(final Callback<EthSyncingResult> callback) {
+    public void ethSyncing(final Callback<EthSyncingResponse> callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {

@@ -1,7 +1,7 @@
 package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResult;
-import com.jaeckel.geth.json.EthSyncingResult;
+import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.SendTransactionresult;
@@ -59,7 +59,7 @@ public class GethConnector implements EthereumJsonRpc{
         }
     }
 
-    public void ethSyncing(Callback<EthSyncingResult> callback) throws IOException {
+    public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
 
         Response response = httpClient.newCall(
                 new Request.Builder().url(JSONRPC_ENDPOINT)
@@ -72,9 +72,9 @@ public class GethConnector implements EthereumJsonRpc{
         try {
             JSONRPC2Response jsonRpc2Response = JSONRPC2Response.parse(jsonString);
             if (jsonRpc2Response.indicatesSuccess()) {
-                JsonAdapter<EthSyncingResult> jsonAdapter = moshi.adapter(EthSyncingResult.class);
-                EthSyncingResult ethSyncingResult = jsonAdapter.fromJson(jsonRpc2Response.toJSONString());
-                callback.onResult(ethSyncingResult);
+                JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
+                EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(jsonRpc2Response.toJSONString());
+                callback.onResult(ethSyncingResponse);
             } else {
                 callback.onError(jsonRpc2Response.getError());
             }

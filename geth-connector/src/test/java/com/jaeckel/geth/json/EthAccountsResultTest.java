@@ -32,12 +32,12 @@ public class EthAccountsResultTest {
     @Test
     public void testEthSyncingResponse() throws IOException {
         BufferedSource json = createJsonBuffer("json/eth_syncing_response.json");
-        JsonAdapter<EthSyncingResult> jsonAdapter = moshi.adapter(EthSyncingResult.class);
+        JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
 
-        EthSyncingResult ethSyncingResponse = jsonAdapter.fromJson(json);
+        EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(json);
 
         assertNotNull(ethSyncingResponse.result);
-        EthSyncingResponse response = ethSyncingResponse.result;
+        EthSyncingResult response = ethSyncingResponse.result;
         assertThat(response.currentBlock, is(898549L));
         assertThat(response.highestBlock, is(1005156L));
         assertThat(response.knownStates, is(10L));
@@ -50,9 +50,9 @@ public class EthAccountsResultTest {
     @Test
     public void testEthSyncingResponseFalse() throws IOException {
         BufferedSource json = createJsonBuffer("json/eth_syncing_response_false.json");
-        JsonAdapter<EthSyncingResult> jsonAdapter = moshi.adapter(EthSyncingResult.class);
+        JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
 
-        EthSyncingResult ethSyncingResponse = jsonAdapter.fromJson(json);
+        EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(json);
 
 //        assertFalse(ethSyncingResponse.result);
 
