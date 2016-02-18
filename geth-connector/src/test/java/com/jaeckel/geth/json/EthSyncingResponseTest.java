@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import okio.BufferedSource;
@@ -16,8 +15,9 @@ import okio.Okio;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-public class EthAccountsResultTest {
+public class EthSyncingResponseTest {
 
     Moshi moshi;
 
@@ -25,6 +25,8 @@ public class EthAccountsResultTest {
     public void setUp() {
         moshi = new Moshi.Builder()
                 .add(new HexAdapter())
+                .add(new FalseToNullFactory())
+                .add(new EthSyncingResultAdapter())
                 .build();
     }
 
@@ -43,10 +45,8 @@ public class EthAccountsResultTest {
         assertThat(response.knownStates, is(10L));
         assertThat(response.pulledStates, is(11L));
         assertThat(response.startingBlock, is(549562L));
-
     }
 
-    @Ignore
     @Test
     public void testEthSyncingResponseFalse() throws IOException {
         BufferedSource json = createJsonBuffer("json/eth_syncing_response_false.json");
@@ -54,7 +54,7 @@ public class EthAccountsResultTest {
 
         EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(json);
 
-//        assertFalse(ethSyncingResponse.result);
+        assertNull(ethSyncingResponse.result);
 
     }
 

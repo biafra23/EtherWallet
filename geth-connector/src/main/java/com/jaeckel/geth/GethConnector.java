@@ -1,5 +1,7 @@
 package com.jaeckel.geth;
 
+import com.jaeckel.geth.json.EthSyncingResultAdapter;
+import com.jaeckel.geth.json.FalseToNullFactory;
 import com.jaeckel.geth.json.EthAccountsResult;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.HexAdapter;
@@ -34,6 +36,8 @@ public class GethConnector implements EthereumJsonRpc{
 
     private Moshi moshi = new Moshi.Builder()
             .add(new HexAdapter())
+            .add(new FalseToNullFactory())
+            .add(new EthSyncingResultAdapter())
             .build();
 
     public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {

@@ -1,16 +1,16 @@
 package com.jaeckel.geth.json;
 
+import com.jaeckel.geth.json.FalseToNullFactory.FalseToNull;
+
 public class EthSyncingResponse {
 
-    boolean syncing;
-    //TODO: or false if not syncing :-(
+    @FalseToNull
     EthSyncingResult result;
 
     @Override
     public String toString() {
-        return "EthSyncingResult{" +
-                "syncing=" + syncing +
-                ", result=" + result +
+        return "EthSyncingResponse{" +
+                "result=" + result +
                 '}';
     }
 }
