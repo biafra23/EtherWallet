@@ -26,7 +26,7 @@ public class GethConnector implements EthereumJsonRpc {
 
     private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
     private static final String METHOD_ETH_SYNCING = "eth_syncing";
-    private static final String JSONRPC_ENDPOINT = "http://localhost:8545/";
+    private static final String JSON_RPC_ENDPOINT = "http://localhost:8545/";
     private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
     private static Integer requestId = 1;
 
@@ -49,31 +49,18 @@ public class GethConnector implements EthereumJsonRpc {
 
     public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {
 
-        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
                                                        .post(RequestBody.create(JSON, createRequest(METHOD_NET_PEER_COUNT)))
                                                        .build()).execute();
-//        String jsonString = response.body().string();
-//        try {
-//            JSONRPC2Response jsonRpc2Response = JSONRPC2Response.parse(jsonString);
-
-//            if (jsonRpc2Response.indicatesSuccess()) {
-
         JsonAdapter<NetPeerCountResponse> jsonAdapter = moshi.adapter(NetPeerCountResponse.class);
         NetPeerCountResponse netPeerCountResponse = jsonAdapter.fromJson(response.body().source());
         callback.onResult(netPeerCountResponse);
-//            } else {
-//                callback.onError(jsonRpc2Response.getError());
-//            }
-//        } catch (JSONRPC2ParseException e) {
-//            System.out.println("JSONRPC2ParseException");
-//            e.printStackTrace();
-//        }
     }
 
     public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
 
         Response response = httpClient.newCall(
-                new Request.Builder().url(JSONRPC_ENDPOINT)
+                new Request.Builder().url(JSON_RPC_ENDPOINT)
                         .post(RequestBody.create(JSON, createRequest(METHOD_ETH_SYNCING)))
                         .build())
                 .execute();
@@ -84,34 +71,20 @@ public class GethConnector implements EthereumJsonRpc {
 
     public void ethAccounts(Callback<EthAccountsResult> callback) throws IOException {
 
-        Response response = httpClient.newCall(new Request.Builder().url(JSONRPC_ENDPOINT)
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
                                                        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
                                                        .build()).execute();
 
-//        String jsonString = response.body().string();
-//        System.out.println("Response: " + jsonString);
-//        try {
-//            JSONRPC2Response jsonRpc2Response = JSONRPC2Response.parse(jsonString);
-//            if (jsonRpc2Response.indicatesSuccess()) {
         JsonAdapter<EthAccountsResult> jsonAdapter = moshi.adapter(EthAccountsResult.class);
         EthAccountsResult ethAccountsResult = jsonAdapter.fromJson(response.body().source());
 
         callback.onResult(ethAccountsResult);
-
-//            } else {
-//
-//                callback.onError(jsonRpc2Response.getError());
-//            }
-//        } catch (JSONRPC2ParseException e) {
-//            System.out.println("JSONRPC2ParseException");
-//            e.printStackTrace();
-//        }
     }
 
     public static String sendTransaction(String from, String to, long wei, Callback<SendTransactionresult> callback) throws IOException {
 
         Response response = httpClient.newCall(
-                new Request.Builder().url(JSONRPC_ENDPOINT)
+                new Request.Builder().url(JSON_RPC_ENDPOINT)
                         .post(RequestBody.create(JSON, createTxRequest(from, to, wei)))
                         .build()
         ).execute();

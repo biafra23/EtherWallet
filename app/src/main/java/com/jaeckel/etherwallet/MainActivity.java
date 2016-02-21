@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -21,7 +22,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.github.ethereum.go_ethereum.cmd.Geth;
-import com.jaeckel.geth.EthereumJsonRpc;
+import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.novoda.notils.logger.simple.Log;
@@ -48,8 +49,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.d("onServiceConnected()");
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
-//            Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT)
-//                    .show();
+
+            ethSyncingObservable.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<EthSyncingResponse>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("onCompleted()");
+                            helloWorld.setText("DONE");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(e, "onError(): ");
+                            currentBlock.setText("ERROR: " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(EthSyncingResponse ethSyncingResponse) {
+                            Log.d("OnNext(): " + ethSyncingResponse);
+
+                            if (ethSyncingResponse.result != null) {
+                                currentBlock.setText("Current Block: " + ethSyncingResponse.result.currentBlock);
+                            } else {
+                                helloWorld.setText("Not syncing");
+                            }
+                        }
+                    });
+
+            netPeerCountObservable.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<NetPeerCountResponse>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("onCompleted()");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(e, "onError(): ");
+                            netPeerCount.setText("ERROR: " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(NetPeerCountResponse netPeerCountResponse) {
+                            Log.d("onNext(): ");
+                            netPeerCount.setText("NetPeerCount: " + netPeerCountResponse.result);
+                        }
+                    });
+
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -62,19 +110,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void call(final Subscriber<? super EthSyncingResponse> sub) {
 
-                    gethService.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResponse>() {
+                    Callback<EthSyncingResponse> ethSyncingCallback = new Callback<EthSyncingResponse>() {
                         @Override
                         public void onResult(EthSyncingResponse ethSyncingResult) {
                             Log.d("onResult(): " + ethSyncingResult);
                             sub.onNext(ethSyncingResult);
-                            sub.onCompleted();
+//                            sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
                             Log.d("onError(): " + error);
                         }
-                    });
+                    };
+                    while (true) {
+                        gethService.ethSyncing(ethSyncingCallback);
+                        SystemClock.sleep(2000);
+                    }
                 }
             }
     );
@@ -83,19 +135,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             new Observable.OnSubscribe<NetPeerCountResponse>() {
                 @Override
                 public void call(final Subscriber<? super NetPeerCountResponse> sub) {
-                    gethService.netPeerCount(new EthereumJsonRpc.Callback<NetPeerCountResponse>() {
+
+                    Callback<NetPeerCountResponse> netPeerCountcallback = new Callback<NetPeerCountResponse>() {
                         @Override
                         public void onResult(NetPeerCountResponse netPeerCount) {
                             Log.d("onResult(): " + netPeerCount);
                             sub.onNext(netPeerCount);
-                            sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
                             Log.d("onError(): " + error);
                         }
-                    });
+                    };
+
+                    while (true) {
+                        gethService.netPeerCount(netPeerCountcallback);
+                        SystemClock.sleep(2000);
+                    }
                 }
             }
     );
@@ -119,52 +176,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View view) {
                 Log.d("onClick()");
 
-                ethSyncingObservable.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Observer<EthSyncingResponse>() {
-                            @Override
-                            public void onCompleted() {
-                                Log.d("onCompleted()");
-                                helloWorld.setText("DONE");
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e(e, "onError(): ");
-                                currentBlock.setText("ERROR: " + e.getMessage());
-                            }
-
-                            @Override
-                            public void onNext(EthSyncingResponse ethSyncingResponse) {
-                                Log.d("OnNext(): " + ethSyncingResponse);
-
-                                if (ethSyncingResponse.result != null) {
-                                    currentBlock.setText("Current Block: " + ethSyncingResponse.result.currentBlock);
-                                } else {
-                                    helloWorld.setText("Not syncing");
-                                }
-                            }
-                        });
-
-                netPeerCountObservable.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<NetPeerCountResponse>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("onCompleted()");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(e, "onError(): ");
-                        netPeerCount.setText("ERROR: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(NetPeerCountResponse netPeerCountResponse) {
-                        Log.d("onNext(): ");
-                        netPeerCount.setText("NetPeerCount: " + netPeerCountResponse.result);
-                    }
-                });
 
 //                gethService.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
 //                    @Override
@@ -197,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @NonNull
