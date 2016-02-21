@@ -31,6 +31,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -42,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView netPeerCount;
     private TextView helloWorld;
 
+    private Subscription netPeerCountSubscription;
+    private Subscription ethSyncingSubscription;
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className,
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
-            ethSyncingObservable.subscribeOn(Schedulers.newThread())
+           ethSyncingSubscription =  ethSyncingObservable.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<EthSyncingResponse>() {
                         @Override
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
 
-            netPeerCountObservable.subscribeOn(Schedulers.newThread())
+         netPeerCountSubscription = netPeerCountObservable.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<NetPeerCountResponse>() {
                         @Override
@@ -123,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Log.d("onError(): " + error);
                         }
                     };
-                    while (true) {
+                    while (!sub.isUnsubscribed()) {
                         gethService.ethSyncing(ethSyncingCallback);
                         SystemClock.sleep(2000);
                     }
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     };
 
-                    while (true) {
+                    while (!sub.isUnsubscribed()) {
                         gethService.netPeerCount(netPeerCountcallback);
                         SystemClock.sleep(2000);
                     }
@@ -295,6 +299,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onPause() {
         super.onPause();
         Log.d("onPause()");
+
+        Log.d("netPeerCountSubscription.unsubscribe();");
+        netPeerCountSubscription.unsubscribe();
+
+        Log.d("ethSyncingSubscription.unsubscribe();");
+        ethSyncingSubscription.unsubscribe();
 
         unbindService(mConnection);
     }

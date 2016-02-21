@@ -104,4 +104,11 @@ public class GethService extends Service implements EthereumJsonRpc {
             return GethService.this;
         }
     }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        //TODO: Kill Geth
+        stopSelf();
+        return super.onUnbind(intent);
+    }
 }
