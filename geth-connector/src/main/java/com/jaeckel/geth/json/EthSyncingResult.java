@@ -9,15 +9,15 @@ public class EthSyncingResult {
     // "startingBlock":"0x862ba"}
 
     @Hex
-    long currentBlock;
+    public long currentBlock;
     @Hex
-    long highestBlock;
+    public long highestBlock;
     @Hex
-    long knownStates;
+    public long knownStates;
     @Hex
-    long pulledStates;
+    public long pulledStates;
     @Hex
-    long startingBlock;
+    public long startingBlock;
 
     @Override
     public String toString() {

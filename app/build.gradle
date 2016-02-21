@@ -25,6 +25,7 @@ repositories {
         dirs 'libs'
     }
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -36,4 +37,6 @@ dependencies {
     compile 'com.android.support:design:23.+'
     compile project(path: ':geth-connector')
     compile 'com.novoda:notils:2.2.16'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'com.squareup.okhttp3:logging-interceptor:(insert latest version)'
 }

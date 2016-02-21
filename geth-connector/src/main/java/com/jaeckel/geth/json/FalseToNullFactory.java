@@ -13,7 +13,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-
 public final class FalseToNullFactory implements JsonAdapter.Factory {
 
     @Retention(RetentionPolicy.RUNTIME)

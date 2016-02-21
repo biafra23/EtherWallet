@@ -10,6 +10,7 @@ public class EtherApp extends Application {
     public void onCreate() {
         super.onCreate();
         Log.setShowLogs(true);
+        Log.TAG = "ETHW";
         Log.d("onCreate()");
     }
 }

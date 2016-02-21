@@ -5,7 +5,7 @@ import com.jaeckel.geth.json.FalseToNullFactory.FalseToNull;
 public class EthSyncingResponse {
 
     @FalseToNull
-    EthSyncingResult result;
+    public EthSyncingResult result;
 
     @Override
     public String toString() {

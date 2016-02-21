@@ -35,6 +35,7 @@ public class GethService extends Service implements EthereumJsonRpc {
         super.onCreate();
         Log.d("onCreate()");
         gethConnector = new GethConnector();
+
         initGeth();
     }
 
@@ -49,9 +50,8 @@ public class GethService extends Service implements EthereumJsonRpc {
 
         new Thread(new Runnable() {
             public void run() {
-
                 Log.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
-                int foo = Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+               Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
                 //Never reached
             }
         }).start();
@@ -74,44 +74,29 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public void netPeerCount(final Callback<NetPeerCountResponse> callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    gethConnector.netPeerCount(callback);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        try {
+            gethConnector.netPeerCount(callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void ethSyncing(final Callback<EthSyncingResponse> callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    gethConnector.ethSyncing(callback);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        try {
+            gethConnector.ethSyncing(callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void ethAccounts(final Callback<EthAccountsResult> callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    gethConnector.ethAccounts(callback);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        try {
+            gethConnector.ethAccounts(callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public class MyBinder extends Binder {

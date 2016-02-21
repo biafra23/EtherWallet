@@ -18,18 +18,29 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
-import com.jaeckel.geth.json.EthAccountsResult;
 import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.novoda.notils.logger.simple.Log;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-//    private GethConnector gethConnector;
+    //    private GethConnector gethConnector;
     private GethService gethService;
+    private TextView currentBlock;
+    private TextView netPeerCount;
+    private TextView helloWorld;
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         public void onServiceConnected(ComponentName className,
@@ -46,60 +57,134 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
+    Observable<EthSyncingResponse> ethSyncingObservable = Observable.create(
+            new Observable.OnSubscribe<EthSyncingResponse>() {
+                @Override
+                public void call(final Subscriber<? super EthSyncingResponse> sub) {
+
+                    gethService.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResponse>() {
+                        @Override
+                        public void onResult(EthSyncingResponse ethSyncingResult) {
+                            Log.d("onResult(): " + ethSyncingResult);
+                            sub.onNext(ethSyncingResult);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    });
+                }
+            }
+    );
+
+    Observable<NetPeerCountResponse> netPeerCountObservable = Observable.create(
+            new Observable.OnSubscribe<NetPeerCountResponse>() {
+                @Override
+                public void call(final Subscriber<? super NetPeerCountResponse> sub) {
+                    gethService.netPeerCount(new EthereumJsonRpc.Callback<NetPeerCountResponse>() {
+                        @Override
+                        public void onResult(NetPeerCountResponse netPeerCount) {
+                            Log.d("onResult(): " + netPeerCount);
+                            sub.onNext(netPeerCount);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    });
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getChainDataDir();
-//        gethConnector = new GethConnector();
-
         setContentView(R.layout.activity_main);
+
+        currentBlock = (TextView) findViewById(R.id.current_block);
+        netPeerCount = (TextView) findViewById(R.id.net_peer_count);
+        helloWorld = (TextView) findViewById(R.id.hello_world);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-//        Log.d("startService()");
-
-//        startService(new Intent(this, GethService.class));
-//        startJSONReporting();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("onClick()");
 
-                gethService.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
+                ethSyncingObservable.subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<EthSyncingResponse>() {
+                            @Override
+                            public void onCompleted() {
+                                Log.d("onCompleted()");
+                                helloWorld.setText("DONE");
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.e(e, "onError(): ");
+                                currentBlock.setText("ERROR: " + e.getMessage());
+                            }
+
+                            @Override
+                            public void onNext(EthSyncingResponse ethSyncingResponse) {
+                                Log.d("OnNext(): " + ethSyncingResponse);
+
+                                if (ethSyncingResponse.result != null) {
+                                    currentBlock.setText("Current Block: " + ethSyncingResponse.result.currentBlock);
+                                } else {
+                                    helloWorld.setText("Not syncing");
+                                }
+                            }
+                        });
+
+                netPeerCountObservable.subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<NetPeerCountResponse>() {
                     @Override
-                    public void onResult(EthAccountsResult ethAccountsResult) {
-                        Log.d("onResult(): " + ethAccountsResult);
+                    public void onCompleted() {
+                        Log.d("onCompleted()");
                     }
 
                     @Override
-                    public void onError(JSONRPC2Error error) {
-                        Log.d("onError(): " + error);
+                    public void onError(Throwable e) {
+                        Log.e(e, "onError(): ");
+                        netPeerCount.setText("ERROR: " + e.getMessage());
+                    }
 
+                    @Override
+                    public void onNext(NetPeerCountResponse netPeerCountResponse) {
+                        Log.d("onNext(): ");
+                        netPeerCount.setText("NetPeerCount: " + netPeerCountResponse.result);
                     }
                 });
 
-                gethService.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResponse>() {
-                    @Override
-                    public void onResult(EthSyncingResponse ethAccountsResult) {
-                        Log.d("onResult(): " + ethAccountsResult);
-                    }
+//                gethService.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
+//                    @Override
+//                    public void onResult(EthAccountsResult ethAccountsResult) {
+//                        Log.d("onResult(): " + ethAccountsResult);
+//                    }
+//
+//                    @Override
+//                    public void onError(JSONRPC2Error error) {
+//                        Log.d("onError(): " + error);
+//
+//                    }
+//                });
 
-                    @Override
-                    public void onError(JSONRPC2Error error) {
-                        Log.d("onError(): " + error);
-
-                    }
-                });
                 //TODO: create account
-//                Geth.doAccountNew(getChainDataDir(), "password");
-//        Geth.run("--datadir=" + getChainDataDir() + " account list");
+                //Geth.doAccountNew(getChainDataDir(), "password");
+                //Geth.run("--datadir=" + getChainDataDir() + " account list");
                 //Geth.run("account list");
 
-                //Log.d("GETHW", "netPeerCount()");
-                //startJSONReporting();
-
-                Snackbar.make(view, "SimpleCall...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Action...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
                         .show();
             }
@@ -112,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
     }
 
     @NonNull
@@ -120,61 +204,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d("absolutePath: " + getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
-
-//    private void startJSONReporting() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                while (true) {
-//                    try {
-//                        System.out.println("GethConnector.netPeerCount()");
-//                        gethConnector.netPeerCount(new EthereumJsonRpc.Callback<NetPeerCountResponse>() {
-//                            @Override
-//                            public void onResult(NetPeerCountResponse netPeerCountResponse) {
-//                                Log.d("ETH", "netPeerCountResponse: " + netPeerCountResponse);
-//                            }
-//
-//                            @Override
-//                            public void onError(JSONRPC2Error error) {
-//                                Log.d("ETH", "error: " + error);
-//                            }
-//                        });
-////                        System.out.println("GethConnector.ethSyncing()");
-////                        GethConnector.ethSyncing();
-////                        System.out.println("GethConnector.ethAccounts()");
-////                        GethConnector.ethAccounts();
-//                        SystemClock.sleep(5000);
-//                    } catch (IOException e) {
-//                        Log.e("ETHW", "FAILURE: ", e);
-//                        SystemClock.sleep(5000);
-//                        //e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }).start();
-//    }
-
-//    private void initGeth() {
-//        Log.d("GETHW", "initGeth()...");
-//
-//        new Thread(new Runnable() {
-//            public void run() {
-//
-//                Log.d("GETHW", "absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
-//                int foo = Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
-//                //Never reached
-//            }
-//        }).start();
-//
-//        SystemClock.sleep(1000);
-//        System.out.println("Geth.doUnlockAccount()... right password");
-//
-//        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "password", "1000ms");
-//        System.out.println("Geth.doUnlockAccount()... wrong password");
-//        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "wrong", "1000ms");
-//        System.out.println("...done.");
-//
-//    }
 
     @Override
     public void onBackPressed() {

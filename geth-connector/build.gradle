@@ -6,6 +6,7 @@ dependencies {
     compile 'com.thetransactioncompany:jsonrpc2-base:1.38'
     //okhttp
     compile 'com.squareup.okhttp3:okhttp:3.1.2'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.1.2'
     // logging
     //...
     compile 'com.squareup.moshi:moshi:1.1.0'
