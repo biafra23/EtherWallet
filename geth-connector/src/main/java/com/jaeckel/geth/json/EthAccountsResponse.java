@@ -2,7 +2,7 @@ package com.jaeckel.geth.json;
 
 import java.util.List;
 
-public class EthAccountsResult {
+public class EthAccountsResponse {
     List<String> result;
 
     @Override

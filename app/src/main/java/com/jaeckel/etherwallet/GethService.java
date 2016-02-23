@@ -11,7 +11,7 @@ import android.support.annotation.Nullable;
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
-import com.jaeckel.geth.json.EthAccountsResult;
+import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.novoda.notils.logger.simple.Log;
@@ -91,7 +91,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethAccounts(final Callback<EthAccountsResult> callback) {
+    public void ethAccounts(final Callback<EthAccountsResponse> callback) {
         try {
             gethConnector.ethAccounts(callback);
         } catch (IOException e) {

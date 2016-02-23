@@ -1,6 +1,6 @@
 package com.jaeckel.geth;
 
-import com.jaeckel.geth.json.EthAccountsResult;
+import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.EthSyncingResultAdapter;
 import com.jaeckel.geth.json.FalseToNullFactory;
@@ -69,16 +69,16 @@ public class GethConnector implements EthereumJsonRpc {
         callback.onResult(ethSyncingResponse);
     }
 
-    public void ethAccounts(Callback<EthAccountsResult> callback) throws IOException {
+    public void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException {
 
         Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
                                                        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_ACCOUNTS)))
                                                        .build()).execute();
 
-        JsonAdapter<EthAccountsResult> jsonAdapter = moshi.adapter(EthAccountsResult.class);
-        EthAccountsResult ethAccountsResult = jsonAdapter.fromJson(response.body().source());
+        JsonAdapter<EthAccountsResponse> jsonAdapter = moshi.adapter(EthAccountsResponse.class);
+        EthAccountsResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
 
-        callback.onResult(ethAccountsResult);
+        callback.onResult(ethAccountsResponse);
     }
 
     public static String sendTransaction(String from, String to, long wei, Callback<SendTransactionresult> callback) throws IOException {

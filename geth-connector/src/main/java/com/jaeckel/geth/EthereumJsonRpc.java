@@ -1,6 +1,6 @@
 package com.jaeckel.geth;
 
-import com.jaeckel.geth.json.EthAccountsResult;
+import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -13,7 +13,7 @@ public interface EthereumJsonRpc {
 
     void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException;
 
-    void ethAccounts(Callback<EthAccountsResult> callback) throws IOException;
+    void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException;
 
     interface Callback<T> {
 

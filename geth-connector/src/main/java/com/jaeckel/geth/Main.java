@@ -1,6 +1,6 @@
 package com.jaeckel.geth;
 
-import com.jaeckel.geth.json.EthAccountsResult;
+import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
@@ -35,10 +35,10 @@ public class Main {
             }
         });
 
-        gethConnector.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
+        gethConnector.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResponse>() {
             @Override
-            public void onResult(EthAccountsResult ethAccountsResult) {
-                System.out.println("ethAccountsResult: " + ethAccountsResult);
+            public void onResult(EthAccountsResponse ethAccountsResponse) {
+                System.out.println("ethAccountsResult: " + ethAccountsResponse);
             }
 
             @Override
