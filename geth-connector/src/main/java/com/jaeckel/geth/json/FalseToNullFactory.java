@@ -25,16 +25,16 @@ public final class FalseToNullFactory implements JsonAdapter.Factory {
         for (Annotation annotation : annotations) {
             if (annotation instanceof FalseToNull) {
                 JsonAdapter<Object> delegate = moshi.nextAdapter(this, type, annotations);
-                return new BooleanToNullAdapter<>(delegate);
+                return new FalseToNullAdapter<>(delegate);
             }
         }
         return null;
     }
 
-    static class BooleanToNullAdapter<T> extends JsonAdapter<T> {
+    static class FalseToNullAdapter<T> extends JsonAdapter<T> {
         private final JsonAdapter<T> delegate;
 
-        BooleanToNullAdapter(JsonAdapter<T> delegate) {
+        FalseToNullAdapter(JsonAdapter<T> delegate) {
             this.delegate = delegate;
         }
 
