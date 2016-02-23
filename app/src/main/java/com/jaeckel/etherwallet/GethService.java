@@ -107,8 +107,15 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.d("onUnbind()");
         //TODO: Kill Geth
-        stopSelf();
+//        stopSelf();
         return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("onDestroy()");
+        super.onDestroy();
     }
 }
