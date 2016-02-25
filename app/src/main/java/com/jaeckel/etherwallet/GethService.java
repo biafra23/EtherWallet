@@ -52,6 +52,7 @@ public class GethService extends Service implements EthereumJsonRpc {
             public void run() {
                 Log.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
                Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+//               Geth.run("--ipcdisable --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
                 //Never reached
             }
         }).start();

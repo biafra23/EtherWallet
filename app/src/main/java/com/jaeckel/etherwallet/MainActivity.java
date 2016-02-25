@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
@@ -250,10 +249,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         }
         if (id == R.id.action_create_account) {
-            Geth.doAccountNew(getChainDataDir(), "password");
-            Snackbar.make(null, "Create Account...", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null)
-                    .show();
+//            Geth.doAccountNew(getChainDataDir(), "password");
+//            Snackbar.make(null, "Create Account...", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null)
+//                    .show();
             return true;
         }
 

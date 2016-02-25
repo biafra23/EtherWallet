@@ -81,6 +81,22 @@ public class GethConnector implements EthereumJsonRpc {
         callback.onResult(ethAccountsResponse);
     }
 
+
+//    public long ethGetBalance(String account) {
+//        JsonRpcRequest jsonRpcRequest = new JsonRpcRequest(Collections.singletonList(account));
+//        Response response = httpClient.newCall(
+//                new Request.Builder().url(JSON_RPC_ENDPOINT)
+//                        .post(RequestBody.create(JSON, createGetBalanceRequest(account)))
+//                        .build()
+//        ).execute();
+//
+//
+//    }
+//
+//    private String createGetBalanceRequest(String account) {
+//        return
+//    }
+
     public static String sendTransaction(String from, String to, long wei, Callback<SendTransactionresult> callback) throws IOException {
 
         Response response = httpClient.newCall(
@@ -113,5 +129,7 @@ public class GethConnector implements EthereumJsonRpc {
         System.out.println("Request: " + reqOut.toString());
         return reqOut.toString();
     }
+
+
 
 }

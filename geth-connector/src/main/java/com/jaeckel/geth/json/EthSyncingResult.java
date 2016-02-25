@@ -2,12 +2,6 @@ package com.jaeckel.geth.json;
 
 public class EthSyncingResult {
 
-    //{"currentBlock":"0xdb5f5",
-    // "highestBlock":"0xf5664",
-    // "knownStates":"0x0",
-    // "pulledStates":"0x0",
-    // "startingBlock":"0x862ba"}
-
     @Hex
     public long currentBlock;
     @Hex
