@@ -9,8 +9,8 @@ public class EthAccountsResponse {
     @Override
     public String toString() {
         return "EthAccountsResponse{" +
-                "id='" + id + '\'' +
-                ", jsonrpc='" + jsonrpc + '\'' +
+//                "id='" + id + '\'' +
+//                ", jsonrpc='" + jsonrpc + '\'' +
                 ", result=" + result +
                 '}';
     }
