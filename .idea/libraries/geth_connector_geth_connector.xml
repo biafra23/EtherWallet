@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="geth-connector.geth-connector">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/geth-connector/build/libs/geth-connector.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
