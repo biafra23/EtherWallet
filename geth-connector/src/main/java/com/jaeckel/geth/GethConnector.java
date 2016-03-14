@@ -6,13 +6,18 @@ import com.jaeckel.geth.json.EthSyncingResultAdapter;
 import com.jaeckel.geth.json.FalseToNullFactory;
 import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.NetPeerCountResponse;
+import com.jaeckel.geth.json.PersonalListAccountsResponse;
+import com.jaeckel.geth.json.PersonalNewAccountResponse;
+import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.jaeckel.geth.json.SendTransactionresult;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.MediaType;
@@ -55,6 +60,22 @@ public class GethConnector implements EthereumJsonRpc {
         JsonAdapter<NetPeerCountResponse> jsonAdapter = moshi.adapter(NetPeerCountResponse.class);
         NetPeerCountResponse netPeerCountResponse = jsonAdapter.fromJson(response.body().source());
         callback.onResult(netPeerCountResponse);
+
+//        try {
+//            personalListAccounts(new Callback<EthAccountsResponse>() {
+//                @Override
+//                public void onResult(EthAccountsResponse ethAccountsResponse) {
+//
+//                }
+//
+//                @Override
+//                public void onError(JSONRPC2Error error) {
+//
+//                }
+//            });
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
@@ -81,7 +102,58 @@ public class GethConnector implements EthereumJsonRpc {
         callback.onResult(ethAccountsResponse);
     }
 
+    @Override
+    public void personalNewAccount(String password, Callback<PersonalNewAccountResponse> callback) throws IOException {
 
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createNewAccountRequest("personal_newAccount", password)))
+                                                       .build()).execute();
+
+        JsonAdapter<PersonalNewAccountResponse> jsonAdapter = moshi.adapter(PersonalNewAccountResponse.class);
+        PersonalNewAccountResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
+
+        callback.onResult(ethAccountsResponse);
+    }
+
+    @Override
+    public void personalListAccounts(Callback<PersonalListAccountsResponse> callback) throws IOException {
+
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+                                                       .post(RequestBody.create(
+                                                               JSON,
+                                                               createListAccountRequest("personal_listAccounts")
+                                                             )
+                                                       )
+                                                       .build()
+        ).execute();
+
+        JsonAdapter<PersonalListAccountsResponse> jsonAdapter = moshi.adapter(PersonalListAccountsResponse.class);
+        PersonalListAccountsResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
+
+        callback.onResult(ethAccountsResponse);
+    }
+
+    @Override
+    public void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException {
+
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+                                                       .post(RequestBody.create(
+                                                               JSON,
+                                                               createUnlockAccountRequest(
+                                                                       "personal_unlockAccount",
+                                                                       address,
+                                                                       password,
+                                                                       timeInSeconds
+                                                               )
+                                                             )
+                                                       ).build()
+        ).execute();
+
+        JsonAdapter<PersonalUnlockAccountResponse> jsonAdapter = moshi.adapter(PersonalUnlockAccountResponse.class);
+        PersonalUnlockAccountResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
+
+        callback.onResult(ethAccountsResponse);
+    }
 //    public long ethGetBalance(String account) {
 //        JsonRpcRequest jsonRpcRequest = new JsonRpcRequest(Collections.singletonList(account));
 //        Response response = httpClient.newCall(
@@ -130,6 +202,34 @@ public class GethConnector implements EthereumJsonRpc {
         return reqOut.toString();
     }
 
+    public static String createListAccountRequest(String method) {
+        List<Object> params = new ArrayList<>();
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
 
+    public static String createNewAccountRequest(String method, String password) {
+        List<Object> params = new ArrayList<>();
+        params.add(password);
+
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
+
+    public static String createUnlockAccountRequest(String method, String address, String password, int timeInSeconds) {
+        List<Object> params = new ArrayList<>();
+        params.add(address);
+        params.add(password);
+        params.add(timeInSeconds);
+
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
 
 }

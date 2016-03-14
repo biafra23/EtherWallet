@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -14,6 +13,9 @@ import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
+import com.jaeckel.geth.json.PersonalListAccountsResponse;
+import com.jaeckel.geth.json.PersonalNewAccountResponse;
+import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.IOException;
@@ -51,19 +53,20 @@ public class GethService extends Service implements EthereumJsonRpc {
         new Thread(new Runnable() {
             public void run() {
                 Log.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
-               Geth.run("--ipcdisable --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+//               Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi \"db,eth,net,web3,personal\" --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+                Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
 //               Geth.run("--ipcdisable --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
                 //Never reached
             }
         }).start();
 
-        SystemClock.sleep(1000);
-        Log.d("Geth.doUnlockAccount()... right password");
+//        SystemClock.sleep(1000);
+//        Log.d("Geth.doUnlockAccount()... right password");
 
-        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "password", "1000ms");
-        Log.d("Geth.doUnlockAccount()... wrong password");
-        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "wrong", "1000ms");
-        Log.d("...done.");
+//        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "password", "1000ms");
+//        Log.d("Geth.doUnlockAccount()... wrong password");
+//        Geth.doUnlockAccount(getChainDataDir(), "0x5d62714ddded8425414d9665cb63a3a1ebf9f860", "wrong", "1000ms");
+//        Log.d("...done.");
 
     }
 
@@ -100,6 +103,33 @@ public class GethService extends Service implements EthereumJsonRpc {
         }
     }
 
+    @Override
+    public void personalListAccounts(Callback<PersonalListAccountsResponse> callback) throws IOException {
+        try {
+            gethConnector.personalListAccounts(callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException {
+        try {
+            gethConnector.personalUnlockAccount(address, password, timeInSeconds, callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void personalNewAccount(String password, final Callback<PersonalNewAccountResponse> callback) {
+        try {
+            gethConnector.personalNewAccount(password, callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public class MyBinder extends Binder {
         GethService getService() {
             return GethService.this;
@@ -110,7 +140,6 @@ public class GethService extends Service implements EthereumJsonRpc {
     public boolean onUnbind(Intent intent) {
         Log.d("onUnbind()");
         //TODO: Kill Geth
-//        stopSelf();
         return super.onUnbind(intent);
     }
 

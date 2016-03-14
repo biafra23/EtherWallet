@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
+import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.novoda.notils.logger.simple.Log;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private GethService gethService;
     private TextView currentBlock;
     private TextView netPeerCount;
+    private TextView ethAccounts;
     private TextView helloWorld;
 
     private Subscription netPeerCountSubscription;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
-           ethSyncingSubscription =  ethSyncingObservable.subscribeOn(Schedulers.newThread())
+            ethSyncingSubscription = ethSyncingObservable.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<EthSyncingResponse>() {
                         @Override
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
 
-         netPeerCountSubscription = netPeerCountObservable.subscribeOn(Schedulers.newThread())
+            netPeerCountSubscription = netPeerCountObservable.subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<NetPeerCountResponse>() {
                         @Override
@@ -160,6 +162,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
     );
 
+    Observable<EthAccountsResponse> ethAccountsObservable = Observable.create(
+            new Observable.OnSubscribe<EthAccountsResponse>() {
+                @Override
+                public void call(final Subscriber<? super EthAccountsResponse> sub) {
+
+                    Callback<EthAccountsResponse> ethAccountsCallback = new Callback<EthAccountsResponse>() {
+                        @Override
+                        public void onResult(EthAccountsResponse ethAccountsResponse) {
+                            Log.d("onResult(): " + ethAccountsResponse);
+                            sub.onNext(ethAccountsResponse);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    };
+
+                    gethService.ethAccounts(ethAccountsCallback);
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -169,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         currentBlock = (TextView) findViewById(R.id.current_block);
         netPeerCount = (TextView) findViewById(R.id.net_peer_count);
         helloWorld = (TextView) findViewById(R.id.hello_world);
+        ethAccounts = (TextView) findViewById(R.id.balances);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -178,25 +205,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View view) {
                 Log.d("onClick()");
+                ethAccountsObservable.subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Observer<EthAccountsResponse>() {
+                            @Override
+                            public void onCompleted() {
+                                Log.d("onCompleted()");
+                            }
 
+                            @Override
+                            public void onError(Throwable e) {
+                                Log.e(e, "onError(): ");
+                                ethAccounts.setText("ERROR: " + e.getMessage());
+                            }
 
-//                gethService.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResult>() {
-//                    @Override
-//                    public void onResult(EthAccountsResult ethAccountsResult) {
-//                        Log.d("onResult(): " + ethAccountsResult);
-//                    }
-//
-//                    @Override
-//                    public void onError(JSONRPC2Error error) {
-//                        Log.d("onError(): " + error);
-//
-//                    }
-//                });
+                            @Override
+                            public void onNext(EthAccountsResponse ethAccountsResponse) {
+                                Log.d("onNext(): ethAccountsResponse: " + ethAccountsResponse);
+                                ethAccounts.setText("Balances: " + ethAccountsResponse.result);
+                            }
+                        });
 
                 //TODO: create account
-                //Geth.doAccountNew(getChainDataDir(), "password");
-                //Geth.run("--datadir=" + getChainDataDir() + " account list");
-                //Geth.run("account list");
+//                Geth.doAccountNew(getChainDataDir(), "password");
+//                Geth.run("--datadir=" + getChainDataDir() + " account list");
+//                Geth.run("account list");
 
                 Snackbar.make(view, "Action...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null)

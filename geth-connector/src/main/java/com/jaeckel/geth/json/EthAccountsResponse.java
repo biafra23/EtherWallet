@@ -4,7 +4,7 @@ import java.util.List;
 
 public class EthAccountsResponse {
 
-    List<String> result;
+    public List<String> result;
 
     @Override
     public String toString() {
