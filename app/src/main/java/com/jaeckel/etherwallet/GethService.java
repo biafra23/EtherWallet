@@ -53,10 +53,16 @@ public class GethService extends Service implements EthereumJsonRpc {
         new Thread(new Runnable() {
             public void run() {
                 Log.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
-//               Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi \"db,eth,net,web3,personal\" --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
-                Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
-//               Geth.run("--ipcdisable --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
-                //Never reached
+
+                if (BuildConfig.ETH_NETWORK.equals("testnet")) {
+
+                    Geth.run("--testnet --ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+                } else {
+                    Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+                    //Never reached
+
+                    throw new RuntimeException("geth crashed");
+                }
             }
         }).start();
 
@@ -104,7 +110,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void personalListAccounts(Callback<PersonalListAccountsResponse> callback) throws IOException {
+    public void personalListAccounts(Callback<PersonalListAccountsResponse> callback) {
         try {
             gethConnector.personalListAccounts(callback);
         } catch (IOException e) {

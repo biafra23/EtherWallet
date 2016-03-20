@@ -11,5 +11,4 @@ public class NetPeerCountResponse {
                 "result=" + result +
                 '}';
     }
-
 }

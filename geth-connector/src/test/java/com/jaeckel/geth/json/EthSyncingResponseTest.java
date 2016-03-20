@@ -1,5 +1,6 @@
 package com.jaeckel.geth.json;
 
+import com.jaeckel.geth.MoshiFactory;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -23,13 +24,8 @@ public class EthSyncingResponseTest {
 
     @Before
     public void setUp() {
-        moshi = new Moshi.Builder()
-                .add(new HexAdapter())
-                .add(new FalseToNullFactory())
-                .add(new EthSyncingResultAdapter())
-                .build();
+        moshi = MoshiFactory.createMoshi();
     }
-
 
     @Test
     public void testEthSyncingResponse() throws IOException {

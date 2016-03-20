@@ -25,6 +25,8 @@ import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
+import com.jaeckel.geth.json.PersonalListAccountsResponse;
+import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.novoda.notils.logger.simple.Log;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
@@ -186,6 +188,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
     );
 
+    Observable<PersonalListAccountsResponse> personalListAccountsObservable = Observable.create(
+            new Observable.OnSubscribe<PersonalListAccountsResponse>() {
+                @Override
+                public void call(final Subscriber<? super PersonalListAccountsResponse> sub) {
+
+                    Callback<PersonalListAccountsResponse> ethAccountsCallback = new Callback<PersonalListAccountsResponse>() {
+                        @Override
+                        public void onResult(PersonalListAccountsResponse ethAccountsResponse) {
+                            Log.d("onResult(): " + ethAccountsResponse);
+                            sub.onNext(ethAccountsResponse);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    };
+
+                    gethService.personalListAccounts(ethAccountsCallback);
+                }
+            }
+    );
+
+    Observable<PersonalNewAccountResponse> personalNewAccountObservable = Observable.create(
+            new Observable.OnSubscribe<PersonalNewAccountResponse>() {
+                @Override
+                public void call(final Subscriber<? super PersonalNewAccountResponse> sub) {
+
+                    Callback<PersonalNewAccountResponse> personalNewAccount = new Callback<PersonalNewAccountResponse>() {
+                        @Override
+                        public void onResult(PersonalNewAccountResponse ethAccountsResponse) {
+                            Log.d("onResult(): " + ethAccountsResponse);
+                            sub.onNext(ethAccountsResponse);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    };
+
+                    gethService.personalNewAccount("", personalNewAccount);
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -288,7 +338,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //                    .show();
             return true;
         }
+        if (id == R.id.action_list_accounts) {
+            personalListAccountsObservable.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<PersonalListAccountsResponse>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("onCompleted()");
+                        }
 
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(e, "onError(): ");
+                            ethAccounts.setText("ERROR: " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(PersonalListAccountsResponse personalListAccountsResponse) {
+                            Log.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
+                            ethAccounts.setText("Balances: " + personalListAccountsResponse.toString());
+                        }
+                    });
+
+//            Snackbar.make(null, "List Accounts...", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null)
+//                    .show();
+            return true;
+        }
+
+        if (id == R.id.action_new_account) {
+            personalNewAccountObservable.subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<PersonalNewAccountResponse>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("onCompleted()");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(e, "onError(): ");
+                            ethAccounts.setText("ERROR: " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(PersonalNewAccountResponse response) {
+                            Log.d("onNext(): response: " + response);
+                            ethAccounts.setText("Balances: " + response.toString());
+                        }
+                    });
+
+//            Snackbar.make(null, "List Accounts...", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null)
+//                    .show();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

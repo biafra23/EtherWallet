@@ -2,9 +2,6 @@ package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
-import com.jaeckel.geth.json.EthSyncingResultAdapter;
-import com.jaeckel.geth.json.FalseToNullFactory;
-import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
@@ -34,6 +31,7 @@ public class GethConnector implements EthereumJsonRpc {
     private static final String JSON_RPC_ENDPOINT = "http://localhost:8545/";
     private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
     private static Integer requestId = 1;
+    private Moshi moshi = MoshiFactory.createMoshi();
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static OkHttpClient httpClient;
@@ -46,11 +44,6 @@ public class GethConnector implements EthereumJsonRpc {
                 .build();
     }
 
-    private Moshi moshi = new Moshi.Builder()
-            .add(new HexAdapter())
-            .add(new FalseToNullFactory())
-            .add(new EthSyncingResultAdapter())
-            .build();
 
     public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {
 
@@ -128,7 +121,10 @@ public class GethConnector implements EthereumJsonRpc {
         ).execute();
 
         JsonAdapter<PersonalListAccountsResponse> jsonAdapter = moshi.adapter(PersonalListAccountsResponse.class);
-        PersonalListAccountsResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
+//        PersonalListAccountsResponse ethAccountsResponse = jsonAdapter.fromJson(response.body().source());
+        String string = response.body().string();
+        System.out.println("personal_listAccounts:  " + string);
+        PersonalListAccountsResponse ethAccountsResponse = jsonAdapter.fromJson(string);
 
         callback.onResult(ethAccountsResponse);
     }
