@@ -11,6 +11,7 @@ import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
+import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -56,7 +57,10 @@ public class GethService extends Service implements EthereumJsonRpc {
 
                 if (BuildConfig.ETH_NETWORK.equals("testnet")) {
 
-                    Geth.run("--testnet --ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+                    Geth.run("--testnet " +
+//                                     " --bootnodes enode://f6526c15fed808a8079debdf2284234bf511907bdf10bd8a80a99a8f635445f015d53e6f50db6deca82c8754da8d0e72188de2b31886f9fa5f5df0fc3ca5157e@[::]:30304 " +
+                                     "--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* " +
+                                     "--fast --datadir=" + getChainDataDir());
                 } else {
                     Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
                     //Never reached
@@ -100,6 +104,14 @@ public class GethService extends Service implements EthereumJsonRpc {
         }
     }
 
+    @Override
+    public void ethBlockNumber(final Callback<EthBlockNumberResponse> callback) {
+        try {
+            gethConnector.ethBlockNumber(callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void ethAccounts(final Callback<EthAccountsResponse> callback) {
         try {

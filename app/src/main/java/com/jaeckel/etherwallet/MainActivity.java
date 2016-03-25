@@ -23,7 +23,9 @@ import android.widget.TextView;
 
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthAccountsResponse;
+import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView helloWorld;
 
     private Subscription netPeerCountSubscription;
+    private Subscription ethBlockNumberSubscription;
     private Subscription ethSyncingSubscription;
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
-            ethSyncingSubscription = ethSyncingObservable.subscribeOn(Schedulers.newThread())
+            ethSyncingSubscription = ethSyncingObservable.subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<EthSyncingResponse>() {
                         @Override
@@ -76,11 +79,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onNext(EthSyncingResponse ethSyncingResponse) {
                             Log.d("OnNext(): " + ethSyncingResponse);
 
-                            if (ethSyncingResponse.result != null) {
-                                currentBlock.setText("Current Block: " + ethSyncingResponse.result.currentBlock);
+                            EthSyncingResult result = ethSyncingResponse.result;
+                            if (result != null) {
+                                currentBlock.setText("Current Block: " + result.currentBlock + "/" + result.highestBlock);
                             } else {
                                 helloWorld.setText("Not syncing");
                             }
+                        }
+                    });
+
+            ethBlockNumberSubscription = ethBlockNumberObservable.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<EthBlockNumberResponse>() {
+                        @Override
+                        public void onCompleted() {
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e("Exception", e);
+                        }
+
+                        @Override
+                        public void onNext(EthBlockNumberResponse ethBlockNumberResponse) {
+                            currentBlock.setText("Current Block: " + ethBlockNumberResponse.result);
                         }
                     });
 
@@ -132,6 +155,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     };
                     while (!sub.isUnsubscribed()) {
                         gethService.ethSyncing(ethSyncingCallback);
+                        SystemClock.sleep(10000);
+                    }
+                }
+            }
+    );
+
+    Observable<EthBlockNumberResponse> ethBlockNumberObservable = Observable.create(
+            new Observable.OnSubscribe<EthBlockNumberResponse>() {
+                @Override
+                public void call(final Subscriber<? super EthBlockNumberResponse> sub) {
+
+                    Callback<EthBlockNumberResponse> ethBlockNumberCallback = new Callback<EthBlockNumberResponse>() {
+                        @Override
+                        public void onResult(EthBlockNumberResponse ethSyncingResult) {
+                            Log.d("onResult(): " + ethSyncingResult);
+                            sub.onNext(ethSyncingResult);
+//                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    };
+                    while (!sub.isUnsubscribed()) {
+                        gethService.ethBlockNumber(ethBlockNumberCallback);
                         SystemClock.sleep(2000);
                     }
                 }
@@ -441,6 +490,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Log.d("ethSyncingSubscription.unsubscribe();");
         ethSyncingSubscription.unsubscribe();
+        ethBlockNumberSubscription.unsubscribe();
 
         unbindService(mConnection);
     }

@@ -1,6 +1,7 @@
 package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
+import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -27,6 +28,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class GethConnector implements EthereumJsonRpc {
 
     private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
+    private static final String METHOD_ETH_BLOCK_NUMBER = "eth_blockNumber";
     private static final String METHOD_ETH_SYNCING = "eth_syncing";
     private static final String JSON_RPC_ENDPOINT = "http://localhost:8545/";
     private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
@@ -81,6 +83,16 @@ public class GethConnector implements EthereumJsonRpc {
         JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
         EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(response.body().source());
         callback.onResult(ethSyncingResponse);
+    }
+
+    public void ethBlockNumber(Callback<EthBlockNumberResponse> callback) throws IOException {
+
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createRequest(METHOD_ETH_BLOCK_NUMBER)))
+                                                       .build()).execute();
+        JsonAdapter<EthBlockNumberResponse> jsonAdapter = moshi.adapter(EthBlockNumberResponse.class);
+        EthBlockNumberResponse ethBlockNumberResponse = jsonAdapter.fromJson(response.body().source());
+        callback.onResult(ethBlockNumberResponse);
     }
 
     public void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException {

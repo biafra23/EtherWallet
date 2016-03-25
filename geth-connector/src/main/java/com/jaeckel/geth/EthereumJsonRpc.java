@@ -1,6 +1,7 @@
 package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
+import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -15,6 +16,8 @@ public interface EthereumJsonRpc {
     void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException;
 
     void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException;
+
+    void ethBlockNumber(Callback<EthBlockNumberResponse> callback) throws IOException;
 
     void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException;
 
