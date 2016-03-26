@@ -13,29 +13,42 @@
   tools:context="com.jaeckel.etherwallet.MainActivity"
   tools:showIn="@layout/app_bar_main">
 
-  <TextView
-    android:id="@+id/hello_world"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Hello World!" />
-
-  <TextView
-    android:id="@+id/current_block"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Syncing: false"
-    />
 
   <TextView
     android:id="@+id/net_peer_count"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Peercount: 0"/>
+    android:text="Peercount: ?" />
+
+  <TextView
+    android:id="@+id/eth_current_block"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Current block: ?"
+    />
+
+  <TextView
+    android:id="@+id/highest_block"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Highest block: ?" />
+
+  <TextView
+    android:id="@+id/eth_syncing"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Syncing: ?" />
+
+  <TextView
+    android:id="@+id/account"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Account: ?" />
 
   <TextView
     android:id="@+id/balances"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Balances: 0" />
+    android:text="Balances: ?" />
 
 </LinearLayout>

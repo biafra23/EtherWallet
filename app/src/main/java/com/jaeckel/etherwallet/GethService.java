@@ -12,6 +12,7 @@ import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
+import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -82,7 +83,7 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @NonNull
     private String getChainDataDir() {
-        Log.d("absolutePath: " + getFilesDir().getAbsolutePath());
+        Log.d("-> absolutePath: " + getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -134,6 +135,17 @@ public class GethService extends Service implements EthereumJsonRpc {
     public void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException {
         try {
             gethConnector.personalUnlockAccount(address, password, timeInSeconds, callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void ethGetBalance(String address, String blockParameter, Callback<EthGetBalanceResponse> ethGetBalanceCallback) {
+        try {
+            //Block number in Hex or "latest", "earliest" or "pending"
+            // See https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
+            gethConnector.ethGetBalance(address, blockParameter, ethGetBalanceCallback);
         } catch (IOException e) {
             e.printStackTrace();
         }

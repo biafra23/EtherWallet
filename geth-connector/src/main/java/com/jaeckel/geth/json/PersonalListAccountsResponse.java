@@ -7,8 +7,8 @@ import java.util.List;
 public class PersonalListAccountsResponse {
 
     @Json(name = "result")
-    private List<String> accounts;
-    private PersonalListAccountsError error;
+    public List<String> accounts;
+    public PersonalListAccountsError error;
 
     @Override
     public String toString() {

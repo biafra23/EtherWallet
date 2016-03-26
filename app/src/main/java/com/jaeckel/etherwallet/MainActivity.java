@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
+import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.NetPeerCountResponse;
@@ -44,9 +45,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //    private GethConnector gethConnector;
     private GethService gethService;
     private TextView currentBlock;
+    private TextView highestBlock;
     private TextView netPeerCount;
-    private TextView ethAccounts;
-    private TextView helloWorld;
+    private TextView ethBalance;
+    private TextView ethSyncing;
+    private TextView ethAccount;
 
     private Subscription netPeerCountSubscription;
     private Subscription ethBlockNumberSubscription;
@@ -66,13 +69,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onCompleted() {
                             Log.d("onCompleted()");
-                            helloWorld.setText("DONE");
+                            ethSyncing.setText("Syncing: DONE");
                         }
 
                         @Override
                         public void onError(Throwable e) {
                             Log.e(e, "onError(): ");
-                            currentBlock.setText("ERROR: " + e.getMessage());
+                            highestBlock.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
@@ -81,9 +84,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                             EthSyncingResult result = ethSyncingResponse.result;
                             if (result != null) {
-                                currentBlock.setText("Current Block: " + result.currentBlock + "/" + result.highestBlock);
+                                highestBlock.setText("Highest Block: " + result.highestBlock);
+                                ethSyncing.setText("Syncing: true");
                             } else {
-                                helloWorld.setText("Not syncing");
+                                ethSyncing.setText("Syncing: false");
                             }
                         }
                     });
@@ -248,6 +252,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             Log.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
+
+//                            ethGetBalanceRespnseObservable.subscribeOn(Schedulers.io())
+//                                    .observeOn(AndroidSchedulers.mainThread())
+//                                    .subscribe();
                         }
 
                         @Override
@@ -257,6 +265,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     };
 
                     gethService.personalListAccounts(ethAccountsCallback);
+
+                }
+            }
+    );
+
+    Observable<EthGetBalanceResponse> ethGetBalanceRespnseObservable = Observable.create(
+            new Observable.OnSubscribe<EthGetBalanceResponse>() {
+                @Override
+                public void call(final Subscriber<? super EthGetBalanceResponse> sub) {
+
+                    Callback<EthGetBalanceResponse> ethAccountsCallback = new Callback<EthGetBalanceResponse>() {
+                        @Override
+                        public void onResult(EthGetBalanceResponse ethAccountsResponse) {
+                            Log.d("onResult(): " + ethAccountsResponse);
+                            sub.onNext(ethAccountsResponse);
+                            sub.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(JSONRPC2Error error) {
+                            Log.d("onError(): " + error);
+                        }
+                    };
+
+                    gethService.ethGetBalance("fc175d4ebc50742899821ec95275f56d33dd5cd2", "latest", ethAccountsCallback);
                 }
             }
     );
@@ -291,10 +324,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getChainDataDir();
         setContentView(R.layout.activity_main);
 
-        currentBlock = (TextView) findViewById(R.id.current_block);
+        currentBlock = (TextView) findViewById(R.id.eth_current_block);
+        highestBlock = (TextView) findViewById(R.id.highest_block);
         netPeerCount = (TextView) findViewById(R.id.net_peer_count);
-        helloWorld = (TextView) findViewById(R.id.hello_world);
-        ethAccounts = (TextView) findViewById(R.id.balances);
+        ethSyncing = (TextView) findViewById(R.id.eth_syncing);
+        ethBalance = (TextView) findViewById(R.id.balances);
+        ethAccount = (TextView) findViewById(R.id.account);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -315,13 +350,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             @Override
                             public void onError(Throwable e) {
                                 Log.e(e, "onError(): ");
-                                ethAccounts.setText("ERROR: " + e.getMessage());
+                                ethBalance.setText("ERROR: " + e.getMessage());
                             }
 
                             @Override
                             public void onNext(EthAccountsResponse ethAccountsResponse) {
                                 Log.d("onNext(): ethAccountsResponse: " + ethAccountsResponse);
-                                ethAccounts.setText("Balances: " + ethAccountsResponse.result);
+                                ethBalance.setText("Balances: " + ethAccountsResponse.result);
                             }
                         });
 
@@ -394,24 +429,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onCompleted() {
                             Log.d("onCompleted()");
+
+                            ethGetBalanceRespnseObservable.subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Observer<EthGetBalanceResponse>() {
+                                        @Override
+                                        public void onCompleted() {
+
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+
+                                        }
+
+                                        @Override
+                                        public void onNext(EthGetBalanceResponse ethGetBalanceResponse) {
+                                            Log.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
+                                            ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse.result));
+                                        }
+                                    });
                         }
 
                         @Override
                         public void onError(Throwable e) {
                             Log.e(e, "onError(): ");
-                            ethAccounts.setText("ERROR: " + e.getMessage());
+                            ethBalance.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(PersonalListAccountsResponse personalListAccountsResponse) {
                             Log.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
-                            ethAccounts.setText("Balances: " + personalListAccountsResponse.toString());
+                            ethAccount.setText("Balances: " + personalListAccountsResponse.accounts.get(0));
                         }
                     });
-
-//            Snackbar.make(null, "List Accounts...", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null)
-//                    .show();
             return true;
         }
 
@@ -427,13 +478,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(Throwable e) {
                             Log.e(e, "onError(): ");
-                            ethAccounts.setText("ERROR: " + e.getMessage());
+                            ethBalance.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(PersonalNewAccountResponse response) {
                             Log.d("onNext(): response: " + response);
-                            ethAccounts.setText("Balances: " + response.toString());
+                            ethBalance.setText("Balances: " + response.toString());
                         }
                     });
 

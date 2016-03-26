@@ -2,6 +2,7 @@ package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
+import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -29,6 +30,7 @@ public class GethConnector implements EthereumJsonRpc {
 
     private static final String METHOD_NET_PEER_COUNT = "net_peerCount";
     private static final String METHOD_ETH_BLOCK_NUMBER = "eth_blockNumber";
+    private static final String METHOD_ETH_GET_BALANCE = "eth_getBalance";
     private static final String METHOD_ETH_SYNCING = "eth_syncing";
     private static final String JSON_RPC_ENDPOINT = "http://localhost:8545/";
     private static final String METHOD_ETH_ACCOUNTS = "eth_accounts";
@@ -107,6 +109,15 @@ public class GethConnector implements EthereumJsonRpc {
         callback.onResult(ethAccountsResponse);
     }
 
+    public void ethGetBalance(String address, String blockParamter, Callback<EthGetBalanceResponse> callback) throws IOException {
+
+        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+                                                       .post(RequestBody.create(JSON, createBalanceRequest(address, blockParamter, METHOD_ETH_GET_BALANCE)))
+                                                       .build()).execute();
+        JsonAdapter<EthGetBalanceResponse> jsonAdapter = moshi.adapter(EthGetBalanceResponse.class);
+        EthGetBalanceResponse ethGetBalanceResponse = jsonAdapter.fromJson(response.body().source());
+        callback.onResult(ethGetBalanceResponse);
+    }
     @Override
     public void personalNewAccount(String password, Callback<PersonalNewAccountResponse> callback) throws IOException {
 
@@ -240,4 +251,13 @@ public class GethConnector implements EthereumJsonRpc {
         return reqOut.toString();
     }
 
+    public static String createBalanceRequest(String address, String blockParameter, String method) {
+        List<Object> params = new ArrayList<>();
+        params.add(address);
+        params.add(blockParameter);
+        Integer id = requestId++;
+        JSONRPC2Request reqOut = new JSONRPC2Request(method, params, id);
+        System.out.println("Request: " + reqOut.toString());
+        return reqOut.toString();
+    }
 }

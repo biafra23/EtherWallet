@@ -14,24 +14,26 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField 'String', 'ETH_NETWORK', '"testnet"'
+//            buildConfigField 'String', 'ETH_NETWORK', '"testnet"'
         }
         release {
-            buildConfigField 'String', 'ETH_NETWORK', '"mainnet"'
+//            buildConfigField 'String', 'ETH_NETWORK', '"mainnet"'
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
-//    productFlavors {
-//        testnet {
-//            buildConfigField
-//        }
-//        mainnet {
-//
-//        }
-//    }
+    productFlavors {
+        morden {
+            applicationIdSuffix ".testnet"
+            buildConfigField 'String', 'ETH_NETWORK', '"testnet"'
+
+        }
+        mainnet {
+            buildConfigField 'String', 'ETH_NETWORK', '"mainnet"'
+        }
+    }
 }
 
 repositories {
