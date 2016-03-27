@@ -24,7 +24,6 @@ import android.widget.TextView;
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
-import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.NetPeerCountResponse;
@@ -32,6 +31,8 @@ import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.novoda.notils.logger.simple.Log;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+
+import java.math.BigInteger;
 
 import rx.Observable;
 import rx.Observer;
@@ -253,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
 
-//                            ethGetBalanceRespnseObservable.subscribeOn(Schedulers.io())
+//                            ethGetBalanceResponseObservable.subscribeOn(Schedulers.io())
 //                                    .observeOn(AndroidSchedulers.mainThread())
 //                                    .subscribe();
                         }
@@ -270,14 +271,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
     );
 
-    Observable<EthGetBalanceResponse> ethGetBalanceRespnseObservable = Observable.create(
-            new Observable.OnSubscribe<EthGetBalanceResponse>() {
+    Observable<BigInteger> ethGetBalanceResponseObservable = Observable.create(
+            new Observable.OnSubscribe<BigInteger>() {
                 @Override
-                public void call(final Subscriber<? super EthGetBalanceResponse> sub) {
+                public void call(final Subscriber<? super BigInteger> sub) {
 
-                    Callback<EthGetBalanceResponse> ethAccountsCallback = new Callback<EthGetBalanceResponse>() {
+                    Callback<BigInteger> ethAccountsCallback = new Callback<BigInteger>() {
                         @Override
-                        public void onResult(EthGetBalanceResponse ethAccountsResponse) {
+                        public void onResult(BigInteger ethAccountsResponse) {
                             Log.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     };
 
-                    gethService.ethGetBalance("fc175d4ebc50742899821ec95275f56d33dd5cd2", "latest", ethAccountsCallback);
+                    gethService.ethGetBalance("0xfc175d4ebc50742899821ec95275f56d33dd5cd2", "latest", ethAccountsCallback);
                 }
             }
     );
@@ -430,9 +431,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         public void onCompleted() {
                             Log.d("onCompleted()");
 
-                            ethGetBalanceRespnseObservable.subscribeOn(Schedulers.newThread())
+                            ethGetBalanceResponseObservable.subscribeOn(Schedulers.newThread())
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Observer<EthGetBalanceResponse>() {
+                                    .subscribe(new Observer<BigInteger>() {
                                         @Override
                                         public void onCompleted() {
 
@@ -440,13 +441,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                         @Override
                                         public void onError(Throwable e) {
-
+                                            e.printStackTrace();
                                         }
 
                                         @Override
-                                        public void onNext(EthGetBalanceResponse ethGetBalanceResponse) {
+                                        public void onNext(BigInteger ethGetBalanceResponse) {
                                             Log.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
-                                            ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse.result));
+                                            ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse));
                                         }
                                     });
                         }

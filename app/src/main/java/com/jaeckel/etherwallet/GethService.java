@@ -12,7 +12,6 @@ import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
-import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -21,6 +20,7 @@ import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class GethService extends Service implements EthereumJsonRpc {
 
@@ -141,7 +141,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethGetBalance(String address, String blockParameter, Callback<EthGetBalanceResponse> ethGetBalanceCallback) {
+    public void ethGetBalance(String address, String blockParameter, Callback<BigInteger> ethGetBalanceCallback) {
         try {
             //Block number in Hex or "latest", "earliest" or "pending"
             // See https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter

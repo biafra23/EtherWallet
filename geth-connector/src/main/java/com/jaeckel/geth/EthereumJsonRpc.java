@@ -2,7 +2,6 @@ package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
-import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
@@ -11,6 +10,7 @@ import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 public interface EthereumJsonRpc {
 
@@ -28,7 +28,7 @@ public interface EthereumJsonRpc {
 
     void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException;
 
-    void ethGetBalance(String address, String blockParameter, Callback<EthGetBalanceResponse> ethGetBalanceCallback) throws IOException;
+    void ethGetBalance(String address, String blockParameter, Callback<BigInteger> ethGetBalanceCallback) throws IOException;
 
     interface Callback<T> {
 

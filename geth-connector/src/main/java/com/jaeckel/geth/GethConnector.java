@@ -2,18 +2,21 @@ package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
-import com.jaeckel.geth.json.EthGetBalanceResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.jaeckel.geth.json.SendTransactionresult;
+import com.segment.jsonrpc.JsonRPCConverterFactory;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +28,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.moshi.MoshiConverterFactory;
+import rx.Observer;
+import rx.schedulers.Schedulers;
 
 public class GethConnector implements EthereumJsonRpc {
 
@@ -39,6 +47,7 @@ public class GethConnector implements EthereumJsonRpc {
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static OkHttpClient httpClient;
+    private final Retrofit retrofit;
 
     public GethConnector() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -46,8 +55,15 @@ public class GethConnector implements EthereumJsonRpc {
         httpClient = new OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .build();
-    }
 
+        retrofit = new Retrofit.Builder()
+                .client(httpClient)
+                .baseUrl(JSON_RPC_ENDPOINT)
+                .addConverterFactory(JsonRPCConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(MoshiFactory.createMoshi()))
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+    }
 
     public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {
 
@@ -73,6 +89,43 @@ public class GethConnector implements EthereumJsonRpc {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
+    }
+
+    public void ethGetBalance(String address, String blockParameter, final Callback<BigInteger> callback) throws IOException {
+
+        GethService gethService = retrofit.create(GethService.class);
+        List<String> params = new ArrayList<>();
+        params.add(address);
+        params.add(blockParameter);
+        gethService.getBalance(params)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onCompleted() {
+                        System.out.println("-------------> onCompleted()");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("-------------> onError(): " + e.getMessage());
+                        e.printStackTrace();
+                        callback.onError(new JSONRPC2Error(0, e.getMessage()));
+                    }
+
+                    @Override
+                    public void onNext(String ethGetBalanceResponse) {
+                        System.out.println("-------------> ethGetBalanceResponse: " + ethGetBalanceResponse);
+                        callback.onResult(new BigInteger(ethGetBalanceResponse.substring(2), 16));
+
+                    }
+                });
+//        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
+//                                                       .post(RequestBody.create(JSON, createBalanceRequest(address, blockParameter, METHOD_ETH_GET_BALANCE)))
+//                                                       .build()).execute();
+//        JsonAdapter<EthGetBalanceResponse> jsonAdapter = moshi.adapter(EthGetBalanceResponse.class);
+//        EthGetBalanceResponse ethGetBalanceResponse = jsonAdapter.fromJson(response.body().source());
+//        callback.onResult(ethGetBalanceResponse);
     }
 
     public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
@@ -109,15 +162,6 @@ public class GethConnector implements EthereumJsonRpc {
         callback.onResult(ethAccountsResponse);
     }
 
-    public void ethGetBalance(String address, String blockParamter, Callback<EthGetBalanceResponse> callback) throws IOException {
-
-        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
-                                                       .post(RequestBody.create(JSON, createBalanceRequest(address, blockParamter, METHOD_ETH_GET_BALANCE)))
-                                                       .build()).execute();
-        JsonAdapter<EthGetBalanceResponse> jsonAdapter = moshi.adapter(EthGetBalanceResponse.class);
-        EthGetBalanceResponse ethGetBalanceResponse = jsonAdapter.fromJson(response.body().source());
-        callback.onResult(ethGetBalanceResponse);
-    }
     @Override
     public void personalNewAccount(String password, Callback<PersonalNewAccountResponse> callback) throws IOException {
 

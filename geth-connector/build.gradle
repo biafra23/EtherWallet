@@ -7,11 +7,19 @@ dependencies {
     //okhttp
     compile 'com.squareup.okhttp3:okhttp:3.1.2'
     compile 'com.squareup.okhttp3:logging-interceptor:3.1.2'
+    //retrofit
+    compile 'com.segment.retrofit.jsonrpc:jsonrpc:1.0.1-SNAPSHOT'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0'
+    compile 'com.squareup.retrofit2:converter-moshi:2.0.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0'
     // logging
     //...
     compile 'com.squareup.moshi:moshi:1.1.0'
 
     testCompile 'junit:junit:4.12'
+
+
+compile 'io.reactivex:rxjava:1.1.0'
 }
 
 // https://code.google.com/p/android/issues/detail?id=64887
