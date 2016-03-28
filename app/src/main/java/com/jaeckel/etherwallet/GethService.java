@@ -11,9 +11,7 @@ import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
-import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
@@ -21,6 +19,8 @@ import com.novoda.notils.logger.simple.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
+
+import rx.Observable;
 
 public class GethService extends Service implements EthereumJsonRpc {
 
@@ -88,12 +88,13 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void netPeerCount(final Callback<NetPeerCountResponse> callback) {
+    public Observable<Long> netPeerCount() {
         try {
-            gethConnector.netPeerCount(callback);
+            return gethConnector.netPeerCount();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     @Override
@@ -106,13 +107,15 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethBlockNumber(final Callback<EthBlockNumberResponse> callback) {
+    public Observable<Long> ethBlockNumber() {
         try {
-            gethConnector.ethBlockNumber(callback);
+            return gethConnector.ethBlockNumber();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
+
     @Override
     public void ethAccounts(final Callback<EthAccountsResponse> callback) {
         try {
@@ -141,14 +144,15 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethGetBalance(String address, String blockParameter, Callback<BigInteger> ethGetBalanceCallback) {
+    public Observable<BigInteger> ethGetBalance(String address, String blockParameter) {
         try {
             //Block number in Hex or "latest", "earliest" or "pending"
             // See https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
-            gethConnector.ethGetBalance(address, blockParameter, ethGetBalanceCallback);
+            return gethConnector.ethGetBalance(address, blockParameter);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     @Override

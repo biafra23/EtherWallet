@@ -14,4 +14,12 @@ public interface GethService {
     @POST("/")
     Observable<String> getBalance(@Body List<String> params);
 
+    @JsonRPC("net_peerCount")
+    @POST("/")
+    Observable<String> netPeerCount(@Body String ignored);
+
+    @JsonRPC("eth_blockNumber")
+    @POST("/")
+    Observable<String> ethBlockNumber(@Body String ignored);
+
 }

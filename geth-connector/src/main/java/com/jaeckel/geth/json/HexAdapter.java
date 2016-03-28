@@ -11,7 +11,7 @@ public class HexAdapter {
 
     @Hex
     @FromJson
-    public long fromJson(String hexString) {
+    public static long fromJson(String hexString) {
         return Long.parseLong(hexString.substring(2), 16);
     }
 }

@@ -4,7 +4,6 @@ import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthBlockNumberResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.HexAdapter;
-import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
@@ -12,7 +11,6 @@ import com.jaeckel.geth.json.SendTransactionresult;
 import com.segment.jsonrpc.JsonRPCConverterFactory;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Request;
 
 import java.io.IOException;
@@ -21,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -31,7 +30,8 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
-import rx.Observer;
+import rx.Observable;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class GethConnector implements EthereumJsonRpc {
@@ -48,6 +48,7 @@ public class GethConnector implements EthereumJsonRpc {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static OkHttpClient httpClient;
     private final Retrofit retrofit;
+    private GethService gethService;
 
     public GethConnector() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -63,69 +64,68 @@ public class GethConnector implements EthereumJsonRpc {
                 .addConverterFactory(MoshiConverterFactory.create(MoshiFactory.createMoshi()))
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
-    }
 
-    public void netPeerCount(Callback<NetPeerCountResponse> callback) throws IOException {
-
-        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
-                                                       .post(RequestBody.create(JSON, createRequest(METHOD_NET_PEER_COUNT)))
-                                                       .build()).execute();
-        JsonAdapter<NetPeerCountResponse> jsonAdapter = moshi.adapter(NetPeerCountResponse.class);
-        NetPeerCountResponse netPeerCountResponse = jsonAdapter.fromJson(response.body().source());
-        callback.onResult(netPeerCountResponse);
-
-//        try {
-//            personalListAccounts(new Callback<EthAccountsResponse>() {
-//                @Override
-//                public void onResult(EthAccountsResponse ethAccountsResponse) {
-//
-//                }
-//
-//                @Override
-//                public void onError(JSONRPC2Error error) {
-//
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        gethService = retrofit.create(GethService.class);
 
     }
 
-    public void ethGetBalance(String address, String blockParameter, final Callback<BigInteger> callback) throws IOException {
+    public Observable<Long> netPeerCount() throws IOException {
+        return Observable.interval(5, TimeUnit.SECONDS)
+                .retry() // continue on any error
+                .flatMap(new Func1<Long, Observable<Long>>() {
+                    @Override
+                    public Observable<Long> call(Long aLong) {
+                        return gethService.netPeerCount("").map(convertHexStringToLong());
+                    }
 
-        GethService gethService = retrofit.create(GethService.class);
+                    private Func1<String, Long> convertHexStringToLong() {
+                        return new Func1<String, Long>() {
+                            @Override
+                            public Long call(String s) {
+                                return HexAdapter.fromJson(s);
+                            }
+                        };
+                    }
+                });
+    }
+
+    public Observable<Long> ethBlockNumber() throws IOException {
+        return Observable.interval(5, TimeUnit.SECONDS)
+                .retry() // continue on any error
+                .flatMap(new Func1<Long, Observable<Long>>() {
+                    @Override
+                    public Observable<Long> call(Long aLong) {
+                        return gethService.ethBlockNumber("").map(convertHexStringToLong());
+                    }
+
+                    private Func1<String, Long> convertHexStringToLong() {
+                        return new Func1<String, Long>() {
+                            @Override
+                            public Long call(String s) {
+                                return HexAdapter.fromJson(s);
+                            }
+                        };
+                    }
+                });
+    }
+
+    public Observable<BigInteger> ethGetBalance(String address, String blockParameter) throws IOException {
+
         List<String> params = new ArrayList<>();
         params.add(address);
         params.add(blockParameter);
-        gethService.getBalance(params)
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onCompleted() {
-                        System.out.println("-------------> onCompleted()");
-                    }
+        return gethService.getBalance(params)
+                .map(hexStringToBigInteger())
+                .subscribeOn(Schedulers.io());
+    }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        System.out.println("-------------> onError(): " + e.getMessage());
-                        e.printStackTrace();
-                        callback.onError(new JSONRPC2Error(0, e.getMessage()));
-                    }
-
-                    @Override
-                    public void onNext(String ethGetBalanceResponse) {
-                        System.out.println("-------------> ethGetBalanceResponse: " + ethGetBalanceResponse);
-                        callback.onResult(new BigInteger(ethGetBalanceResponse.substring(2), 16));
-
-                    }
-                });
-//        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
-//                                                       .post(RequestBody.create(JSON, createBalanceRequest(address, blockParameter, METHOD_ETH_GET_BALANCE)))
-//                                                       .build()).execute();
-//        JsonAdapter<EthGetBalanceResponse> jsonAdapter = moshi.adapter(EthGetBalanceResponse.class);
-//        EthGetBalanceResponse ethGetBalanceResponse = jsonAdapter.fromJson(response.body().source());
-//        callback.onResult(ethGetBalanceResponse);
+    private Func1<String, BigInteger> hexStringToBigInteger() {
+        return new Func1<String, BigInteger>() {
+            @Override
+            public BigInteger call(String balanceHexString) {
+                return new BigInteger(balanceHexString.substring(2), 16);
+            }
+        };
     }
 
     public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
@@ -217,20 +217,6 @@ public class GethConnector implements EthereumJsonRpc {
 
         callback.onResult(ethAccountsResponse);
     }
-//    public long ethGetBalance(String account) {
-//        JsonRpcRequest jsonRpcRequest = new JsonRpcRequest(Collections.singletonList(account));
-//        Response response = httpClient.newCall(
-//                new Request.Builder().url(JSON_RPC_ENDPOINT)
-//                        .post(RequestBody.create(JSON, createGetBalanceRequest(account)))
-//                        .build()
-//        ).execute();
-//
-//
-//    }
-//
-//    private String createGetBalanceRequest(String account) {
-//        return
-//    }
 
     public static String sendTransaction(String from, String to, long wei, Callback<SendTransactionresult> callback) throws IOException {
 

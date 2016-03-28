@@ -2,10 +2,11 @@ package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResponse;
-import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+
+import rx.Observer;
 
 public class Main {
 
@@ -13,17 +14,25 @@ public class Main {
         System.out.println("main()");
 
         GethConnector gethConnector = new GethConnector();
-        gethConnector.netPeerCount(new EthereumJsonRpc.Callback<NetPeerCountResponse>() {
-            @Override
-            public void onResult(NetPeerCountResponse netPeerCountResponse) {
-                System.out.println("netPeerCountResponse: " + netPeerCountResponse);
-            }
+        gethConnector.netPeerCount()
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onCompleted() {
 
-            @Override
-            public void onError(JSONRPC2Error error) {
-                System.out.println("error: " + error);
-            }
-        });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("error: " + e.getMessage());
+
+                    }
+
+                    @Override
+                    public void onNext(Long netPeerCount) {
+                        System.out.println("netPeerCount: " + netPeerCount);
+
+                    }
+                });
 
         gethConnector.ethSyncing(new EthereumJsonRpc.Callback<EthSyncingResponse>() {
             @Override
