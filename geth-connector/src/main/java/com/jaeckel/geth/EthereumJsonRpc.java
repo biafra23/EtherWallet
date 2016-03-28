@@ -1,7 +1,7 @@
 package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
@@ -14,7 +14,6 @@ import rx.Observable;
 
 public interface EthereumJsonRpc {
 
-    void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException;
 
 
     void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException;
@@ -25,11 +24,13 @@ public interface EthereumJsonRpc {
 
     void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException;
 
-    Observable<BigInteger> ethGetBalance(String address, String blockParameter) throws IOException;
+    Observable<BigInteger> ethGetBalance(String address, String blockParameter);
 
-    Observable<Long> netPeerCount() throws IOException;
+    Observable<Long> netPeerCount();
 
-    Observable<Long> ethBlockNumber() throws IOException;
+    Observable<Long> ethBlockNumber();
+
+    Observable<EthSyncingResult> ethSyncing();
 
     interface Callback<T> {
 

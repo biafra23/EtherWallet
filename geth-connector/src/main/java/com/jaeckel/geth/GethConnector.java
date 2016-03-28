@@ -1,8 +1,7 @@
 package com.jaeckel.geth;
 
 import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.EthBlockNumberResponse;
-import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.HexAdapter;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
@@ -52,7 +51,7 @@ public class GethConnector implements EthereumJsonRpc {
 
     public GethConnector() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
         httpClient = new OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .build();
@@ -69,7 +68,7 @@ public class GethConnector implements EthereumJsonRpc {
 
     }
 
-    public Observable<Long> netPeerCount() throws IOException {
+    public Observable<Long> netPeerCount() {
         return Observable.interval(5, TimeUnit.SECONDS)
                 .retry() // continue on any error
                 .flatMap(new Func1<Long, Observable<Long>>() {
@@ -89,7 +88,7 @@ public class GethConnector implements EthereumJsonRpc {
                 });
     }
 
-    public Observable<Long> ethBlockNumber() throws IOException {
+    public Observable<Long> ethBlockNumber() {
         return Observable.interval(5, TimeUnit.SECONDS)
                 .retry() // continue on any error
                 .flatMap(new Func1<Long, Observable<Long>>() {
@@ -109,7 +108,7 @@ public class GethConnector implements EthereumJsonRpc {
                 });
     }
 
-    public Observable<BigInteger> ethGetBalance(String address, String blockParameter) throws IOException {
+    public Observable<BigInteger> ethGetBalance(String address, String blockParameter) {
 
         List<String> params = new ArrayList<>();
         params.add(address);
@@ -128,27 +127,27 @@ public class GethConnector implements EthereumJsonRpc {
         };
     }
 
-    public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
 
-        Response response = httpClient.newCall(
-                new Request.Builder().url(JSON_RPC_ENDPOINT)
-                        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_SYNCING)))
-                        .build())
-                .execute();
-        JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
-        EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(response.body().source());
-        callback.onResult(ethSyncingResponse);
+    public Observable<EthSyncingResult> ethSyncing() {
+        return Observable.interval(5, TimeUnit.SECONDS).flatMap(new Func1<Long, Observable<EthSyncingResult>>() {
+            @Override
+            public Observable<EthSyncingResult> call(Long aLong) {
+                return gethService.ethSyncing("");
+            }
+        });
     }
 
-    public void ethBlockNumber(Callback<EthBlockNumberResponse> callback) throws IOException {
-
-        Response response = httpClient.newCall(new Request.Builder().url(JSON_RPC_ENDPOINT)
-                                                       .post(RequestBody.create(JSON, createRequest(METHOD_ETH_BLOCK_NUMBER)))
-                                                       .build()).execute();
-        JsonAdapter<EthBlockNumberResponse> jsonAdapter = moshi.adapter(EthBlockNumberResponse.class);
-        EthBlockNumberResponse ethBlockNumberResponse = jsonAdapter.fromJson(response.body().source());
-        callback.onResult(ethBlockNumberResponse);
-    }
+//    public void ethSyncing(Callback<EthSyncingResponse> callback) throws IOException {
+//
+//        Response response = httpClient.newCall(
+//                new Request.Builder().url(JSON_RPC_ENDPOINT)
+//                        .post(RequestBody.create(JSON, createRequest(METHOD_ETH_SYNCING)))
+//                        .build())
+//                .execute();
+//        JsonAdapter<EthSyncingResponse> jsonAdapter = moshi.adapter(EthSyncingResponse.class);
+//        EthSyncingResponse ethSyncingResponse = jsonAdapter.fromJson(response.body().source());
+//        callback.onResult(ethSyncingResponse);
+//    }
 
     public void ethAccounts(Callback<EthAccountsResponse> callback) throws IOException {
 

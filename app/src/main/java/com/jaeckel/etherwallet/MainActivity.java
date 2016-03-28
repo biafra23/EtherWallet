@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -23,7 +22,6 @@ import android.widget.TextView;
 
 import com.jaeckel.geth.EthereumJsonRpc.Callback;
 import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.EthSyncingResponse;
 import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
@@ -62,9 +60,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
-            ethSyncingSubscription = ethSyncingObservable.subscribeOn(Schedulers.io())
+            ethSyncingSubscription = gethService.ethSyncing().subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<EthSyncingResponse>() {
+                    .subscribe(new Observer<EthSyncingResult>() {
                         @Override
                         public void onCompleted() {
                             Log.d("onCompleted()");
@@ -78,10 +76,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
 
                         @Override
-                        public void onNext(EthSyncingResponse ethSyncingResponse) {
-                            Log.d("OnNext(): " + ethSyncingResponse);
+                        public void onNext(EthSyncingResult result) {
+                            Log.d("OnNext(): " + result);
 
-                            EthSyncingResult result = ethSyncingResponse.result;
                             if (result != null) {
                                 highestBlock.setText("Highest Block: " + result.highestBlock);
                                 ethSyncing.setText("Syncing: true");
@@ -91,8 +88,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
 
-            Observable<Long> ethBlockNumberObservable = gethService.ethBlockNumber();
-            ethBlockNumberSubscription = ethBlockNumberObservable.subscribeOn(Schedulers.io())
+            ethBlockNumberSubscription = gethService.ethBlockNumber().subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<Long>() {
                         @Override
@@ -111,7 +107,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
                     });
 
-            netPeerCountSubscription = getNetPeerCountSubscription();
+            netPeerCountSubscription = gethService.netPeerCount().subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Long>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.d("----> onCompleted()");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            Log.e(e, "----> onError(): ");
+                            netPeerCount.setText("ERROR: " + e.getMessage());
+                        }
+
+                        @Override
+                        public void onNext(Long netPeerCountResponse) {
+                            Log.d("----> onNext(): ");
+                            netPeerCount.setText("NetPeerCount: " + netPeerCountResponse);
+                        }
+                    });
 
         }
 
@@ -119,56 +134,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             gethService = null;
         }
     };
-
-    private Subscription getNetPeerCountSubscription() {
-        return gethService.netPeerCount().subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Long>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("----> onCompleted()");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(e, "----> onError(): ");
-                        netPeerCount.setText("ERROR: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(Long netPeerCountResponse) {
-                        Log.d("----> onNext(): ");
-                        netPeerCount.setText("NetPeerCount: " + netPeerCountResponse);
-                    }
-                });
-    }
-
-    Observable<EthSyncingResponse> ethSyncingObservable = Observable.create(
-            new Observable.OnSubscribe<EthSyncingResponse>() {
-                @Override
-                public void call(final Subscriber<? super EthSyncingResponse> sub) {
-
-                    Callback<EthSyncingResponse> ethSyncingCallback = new Callback<EthSyncingResponse>() {
-                        @Override
-                        public void onResult(EthSyncingResponse ethSyncingResult) {
-                            Log.d("onResult(): " + ethSyncingResult);
-                            sub.onNext(ethSyncingResult);
-//                            sub.onCompleted();
-                        }
-
-                        @Override
-                        public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
-                        }
-                    };
-                    while (!sub.isUnsubscribed()) {
-                        gethService.ethSyncing(ethSyncingCallback);
-                        SystemClock.sleep(10000);
-                    }
-                }
-            }
-    );
-
 
     Observable<EthAccountsResponse> ethAccountsObservable = Observable.create(
             new Observable.OnSubscribe<EthAccountsResponse>() {

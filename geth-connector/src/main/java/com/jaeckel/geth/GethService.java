@@ -1,5 +1,6 @@
 package com.jaeckel.geth;
 
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.segment.jsonrpc.JsonRPC;
 
 import java.util.List;
@@ -21,5 +22,9 @@ public interface GethService {
     @JsonRPC("eth_blockNumber")
     @POST("/")
     Observable<String> ethBlockNumber(@Body String ignored);
+
+    @JsonRPC("eth_syncing")
+    @POST("/")
+    Observable<EthSyncingResult> ethSyncing(@Body String ignored);
 
 }

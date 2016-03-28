@@ -11,7 +11,7 @@ import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.EthSyncingResponse;
+import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
@@ -89,31 +89,17 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public Observable<Long> netPeerCount() {
-        try {
-            return gethConnector.netPeerCount();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return gethConnector.netPeerCount();
     }
 
     @Override
-    public void ethSyncing(final Callback<EthSyncingResponse> callback) {
-        try {
-            gethConnector.ethSyncing(callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Observable<EthSyncingResult> ethSyncing() {
+        return gethConnector.ethSyncing();
     }
 
     @Override
     public Observable<Long> ethBlockNumber() {
-        try {
-            return gethConnector.ethBlockNumber();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return gethConnector.ethBlockNumber();
     }
 
     @Override
@@ -145,14 +131,9 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public Observable<BigInteger> ethGetBalance(String address, String blockParameter) {
-        try {
-            //Block number in Hex or "latest", "earliest" or "pending"
-            // See https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
-            return gethConnector.ethGetBalance(address, blockParameter);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        //Block number in Hex or "latest", "earliest" or "pending"
+        // See https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
+        return gethConnector.ethGetBalance(address, blockParameter);
     }
 
     @Override
