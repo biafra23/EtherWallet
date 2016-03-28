@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,26 +19,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.jaeckel.geth.EthereumJsonRpc.Callback;
-import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResult;
-import com.jaeckel.geth.json.PersonalListAccountsResponse;
-import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.novoda.notils.logger.simple.Log;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    //    private GethConnector gethConnector;
     private GethService gethService;
     private TextView currentBlock;
     private TextView highestBlock;
@@ -135,83 +129,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    Observable<EthAccountsResponse> ethAccountsObservable = Observable.create(
-            new Observable.OnSubscribe<EthAccountsResponse>() {
-                @Override
-                public void call(final Subscriber<? super EthAccountsResponse> sub) {
-
-                    Callback<EthAccountsResponse> ethAccountsCallback = new Callback<EthAccountsResponse>() {
-                        @Override
-                        public void onResult(EthAccountsResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
-                            sub.onNext(ethAccountsResponse);
-                            sub.onCompleted();
-                        }
-
-                        @Override
-                        public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
-                        }
-                    };
-
-                    gethService.ethAccounts(ethAccountsCallback);
-                }
-            }
-    );
-
-    Observable<PersonalListAccountsResponse> personalListAccountsObservable = Observable.create(
-            new Observable.OnSubscribe<PersonalListAccountsResponse>() {
-                @Override
-                public void call(final Subscriber<? super PersonalListAccountsResponse> sub) {
-
-                    Callback<PersonalListAccountsResponse> ethAccountsCallback = new Callback<PersonalListAccountsResponse>() {
-                        @Override
-                        public void onResult(PersonalListAccountsResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
-                            sub.onNext(ethAccountsResponse);
-                            sub.onCompleted();
-
-//                            ethGetBalanceResponseObservable.subscribeOn(Schedulers.io())
-//                                    .observeOn(AndroidSchedulers.mainThread())
-//                                    .subscribe();
-                        }
-
-                        @Override
-                        public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
-                        }
-                    };
-
-                    gethService.personalListAccounts(ethAccountsCallback);
-
-                }
-            }
-    );
-
-    Observable<PersonalNewAccountResponse> personalNewAccountObservable = Observable.create(
-            new Observable.OnSubscribe<PersonalNewAccountResponse>() {
-                @Override
-                public void call(final Subscriber<? super PersonalNewAccountResponse> sub) {
-
-                    Callback<PersonalNewAccountResponse> personalNewAccount = new Callback<PersonalNewAccountResponse>() {
-                        @Override
-                        public void onResult(PersonalNewAccountResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
-                            sub.onNext(ethAccountsResponse);
-                            sub.onCompleted();
-                        }
-
-                        @Override
-                        public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
-                        }
-                    };
-
-                    gethService.personalNewAccount("", personalNewAccount);
-                }
-            }
-    );
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -229,42 +146,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("onClick()");
-                ethAccountsObservable.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Observer<EthAccountsResponse>() {
-                            @Override
-                            public void onCompleted() {
-                                Log.d("onCompleted()");
-                            }
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("onClick()");
+                    gethService.ethAccounts().subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<List<String>>() {
+                                @Override
+                                public void onCompleted() {
+                                    Log.d("onCompleted()");
+                                }
 
-                            @Override
-                            public void onError(Throwable e) {
-                                Log.e(e, "onError(): ");
-                                ethBalance.setText("ERROR: " + e.getMessage());
-                            }
+                                @Override
+                                public void onError(Throwable e) {
+                                    Log.e(e, "onError(): ");
+                                    ethBalance.setText("ERROR: " + e.getMessage());
+                                }
 
-                            @Override
-                            public void onNext(EthAccountsResponse ethAccountsResponse) {
-                                Log.d("onNext(): ethAccountsResponse: " + ethAccountsResponse);
-                                ethBalance.setText("Balances: " + ethAccountsResponse.result);
-                            }
-                        });
-
-                //TODO: create account
-//                Geth.doAccountNew(getChainDataDir(), "password");
-//                Geth.run("--datadir=" + getChainDataDir() + " account list");
-//                Geth.run("account list");
-
-                Snackbar.make(view, "Action...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null)
-                        .show();
-            }
-        });
-
+                                @Override
+                                public void onNext(List<String> ethAccounts) {
+                                    Log.d("onNext(): ethAccounts: " + ethAccounts);
+                                    ethBalance.setText("Balances: " + ethAccounts);
+                                }
+                            });
+                }
+            });
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -309,87 +218,100 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.action_settings) {
             return true;
         }
-        if (id == R.id.action_create_account) {
-//            Geth.doAccountNew(getChainDataDir(), "password");
-//            Snackbar.make(null, "Create Account...", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null)
-//                    .show();
-            return true;
-        }
         if (id == R.id.action_list_accounts) {
-            personalListAccountsObservable.subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<PersonalListAccountsResponse>() {
-                        @Override
-                        public void onCompleted() {
-                            Log.d("onCompleted()");
-
-                            gethService
-                                    .ethGetBalance("0xfc175d4ebc50742899821ec95275f56d33dd5cd2", "latest")
-                                    .subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Observer<BigInteger>() {
-                                        @Override
-                                        public void onCompleted() {
-
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        @Override
-                                        public void onNext(BigInteger ethGetBalanceResponse) {
-                                            Log.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
-                                            ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse));
-                                        }
-                                    });
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
-                            ethBalance.setText("ERROR: " + e.getMessage());
-                        }
-
-                        @Override
-                        public void onNext(PersonalListAccountsResponse personalListAccountsResponse) {
-                            Log.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
-                            ethAccount.setText("Balances: " + personalListAccountsResponse.accounts.get(0));
-                        }
-                    });
+            calculateBalanceForAllAccounts();
             return true;
         }
 
         if (id == R.id.action_new_account) {
-            personalNewAccountObservable.subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<PersonalNewAccountResponse>() {
-                        @Override
-                        public void onCompleted() {
-                            Log.d("onCompleted()");
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
-                            ethBalance.setText("ERROR: " + e.getMessage());
-                        }
-
-                        @Override
-                        public void onNext(PersonalNewAccountResponse response) {
-                            Log.d("onNext(): response: " + response);
-                            ethBalance.setText("Balances: " + response.toString());
-                        }
-                    });
-
-//            Snackbar.make(null, "List Accounts...", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null)
-//                    .show();
+            createAccount();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void createAccount() {
+        gethService.personalNewAccount("")
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("onCompleted()");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(e, "onError(): ");
+                        ethBalance.setText("ERROR: " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(String response) {
+                        Log.d("onNext(): response: " + response);
+                        ethBalance.setText("Balances: " + response);
+                    }
+                });
+    }
+
+    private void calculateBalanceForAllAccounts() {
+        gethService.personalListAccounts()
+                .subscribeOn(Schedulers.io())
+                .flatMap(splitList())
+                .map(getBalances())
+                .concatMap(mergeObservables())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BigInteger>() {
+                    BigInteger sum = BigInteger.ZERO;
+
+                    @Override
+                    public void onCompleted() {
+                        Log.d("sum: " + sum);
+                        ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(e, "onError(): ");
+                    }
+
+                    @Override
+                    public void onNext(BigInteger bigInteger) {
+                        Log.d("bigInteger: " + bigInteger);
+                        sum = sum.add(bigInteger);
+                        ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
+                    }
+                });
+    }
+
+    @NonNull
+    private Func1<Observable<BigInteger>, Observable<BigInteger>> mergeObservables() {
+        return new Func1<Observable<BigInteger>, Observable<BigInteger>>() {
+            @Override
+            public Observable<BigInteger> call(Observable<BigInteger> bigIntegerObservable) {
+                return bigIntegerObservable;
+            }
+        };
+    }
+
+    @NonNull
+    private Func1<String, Observable<BigInteger>> getBalances() {
+        return new Func1<String, Observable<BigInteger>>() {
+            @Override
+            public Observable<BigInteger> call(String account) {
+                return gethService.ethGetBalance(account, "latest");
+            }
+        };
+    }
+
+    @NonNull
+    private Func1<List<String>, Observable<String>> splitList() {
+        return new Func1<List<String>, Observable<String>>() {
+            @Override
+            public Observable<String> call(List<String> strings) {
+                return Observable.from(strings);
+            }
+        };
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

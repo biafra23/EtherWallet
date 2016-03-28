@@ -1,9 +1,8 @@
 package com.jaeckel.geth;
 
-import com.jaeckel.geth.json.EthAccountsResponse;
-import com.jaeckel.geth.json.PersonalListAccountsResponse;
-import com.jaeckel.geth.json.PersonalNewAccountResponse;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.jaeckel.geth.json.EthSyncingResult;
+
+import java.util.List;
 
 import rx.Observer;
 
@@ -33,40 +32,74 @@ public class Main {
                     }
                 });
 
-        gethConnector.ethSyncing();
-
-        gethConnector.ethAccounts(new EthereumJsonRpc.Callback<EthAccountsResponse>() {
+        gethConnector.ethSyncing().subscribe(new Observer<EthSyncingResult>() {
             @Override
-            public void onResult(EthAccountsResponse ethAccountsResponse) {
-                System.out.println("ethAccountsResult: " + ethAccountsResponse);
+            public void onCompleted() {
+
             }
 
             @Override
-            public void onError(JSONRPC2Error error) {
-                System.out.println("error: " + error);
-            }
-        });
-
-        gethConnector.personalListAccounts(new EthereumJsonRpc.Callback<PersonalListAccountsResponse>() {
-            @Override
-            public void onResult(PersonalListAccountsResponse personalListAccountsResponse) {
-                System.out.println("personalListAccountsResponse: " + personalListAccountsResponse);
+            public void onError(Throwable e) {
+                System.out.println("error: " + e.getMessage());
             }
 
             @Override
-            public void onError(JSONRPC2Error error) {
-                System.out.println("error: " + error);
+            public void onNext(EthSyncingResult ethSyncingResult) {
+                System.out.println("ethSyncingResult: " + ethSyncingResult);
+
             }
         });
-        gethConnector.personalNewAccount("", new EthereumJsonRpc.Callback<PersonalNewAccountResponse>() {
+        gethConnector.ethAccounts().subscribe(new Observer<List<String>>() {
             @Override
-            public void onResult(PersonalNewAccountResponse personalNewAccountResponse) {
-                System.out.println("personalNewAccountResponse: " + personalNewAccountResponse);
+            public void onCompleted() {
+
             }
 
             @Override
-            public void onError(JSONRPC2Error error) {
-                System.out.println("error: " + error);
+            public void onError(Throwable e) {
+                System.out.println("error: " + e.getMessage());
+            }
+
+            @Override
+            public void onNext(List<String> accounts) {
+                for (String account : accounts) {
+                    System.out.println("Account: " + account);
+                }
+            }
+        });
+        gethConnector.personalListAccounts().subscribe(new Observer<List<String>>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("error: " + e.getMessage());
+            }
+
+            @Override
+            public void onNext(List<String> accounts) {
+                for (String account : accounts) {
+                    System.out.println("Account: " + account);
+                }
+            }
+        });
+        gethConnector.personalNewAccount("").subscribe(new Observer<String>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("error: " + e.getMessage());
+            }
+
+            @Override
+            public void onNext(String s) {
+                System.out.println("s: " + s);
+
             }
         });
     }

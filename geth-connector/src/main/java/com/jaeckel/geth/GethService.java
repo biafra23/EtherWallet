@@ -27,4 +27,20 @@ public interface GethService {
     @POST("/")
     Observable<EthSyncingResult> ethSyncing(@Body String ignored);
 
+    @JsonRPC("eth_accounts")
+    @POST("/")
+    Observable<List<String>> ethAccounts(@Body String ignored);
+
+    @JsonRPC("personal_listAccounts") //same as eth_accounts?
+    @POST("/")
+    Observable<List<String>> personalListAccounts(@Body String ignored);
+
+    @JsonRPC("personal_unlockAccount")
+    @POST("/")
+    Observable<Void> personalUnlockAccount(@Body List<Object> params);
+
+    @JsonRPC("personal_newAccount")
+    @POST("/")
+    Observable<String> personalNewAccount(@Body String password);
+
 }

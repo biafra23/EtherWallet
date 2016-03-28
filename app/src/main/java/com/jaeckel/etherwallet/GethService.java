@@ -10,15 +10,11 @@ import android.support.annotation.Nullable;
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
-import com.jaeckel.geth.json.EthAccountsResponse;
 import com.jaeckel.geth.json.EthSyncingResult;
-import com.jaeckel.geth.json.PersonalListAccountsResponse;
-import com.jaeckel.geth.json.PersonalNewAccountResponse;
-import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
 import com.novoda.notils.logger.simple.Log;
 
-import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 import rx.Observable;
 
@@ -103,30 +99,18 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void ethAccounts(final Callback<EthAccountsResponse> callback) {
-        try {
-            gethConnector.ethAccounts(callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Observable<List<String>> ethAccounts() {
+        return gethConnector.ethAccounts();
     }
 
     @Override
-    public void personalListAccounts(Callback<PersonalListAccountsResponse> callback) {
-        try {
-            gethConnector.personalListAccounts(callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Observable<List<String>> personalListAccounts() {
+        return gethConnector.personalListAccounts();
     }
 
     @Override
-    public void personalUnlockAccount(String address, String password, int timeInSeconds, Callback<PersonalUnlockAccountResponse> callback) throws IOException {
-        try {
-            gethConnector.personalUnlockAccount(address, password, timeInSeconds, callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Observable<Void> personalUnlockAccount(String address, String password, int timeInSeconds) {
+        return gethConnector.personalUnlockAccount(address, password, timeInSeconds);
     }
 
     @Override
@@ -137,12 +121,8 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     @Override
-    public void personalNewAccount(String password, final Callback<PersonalNewAccountResponse> callback) {
-        try {
-            gethConnector.personalNewAccount(password, callback);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Observable<String> personalNewAccount(String password) {
+        return gethConnector.personalNewAccount(password);
     }
 
     public class MyBinder extends Binder {

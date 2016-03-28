@@ -6,12 +6,6 @@
       android:title="@string/action_settings"
       android:orderInCategory="100"
       app:showAsAction="never"/>
-
-  <item
-    android:id="@+id/action_create_account"
-    android:title="@string/action_create_account"
-    android:orderInCategory="100"
-    app:showAsAction="never" />
   <item
     android:id="@+id/action_list_accounts"
     android:title="@string/action_list_accounts"
