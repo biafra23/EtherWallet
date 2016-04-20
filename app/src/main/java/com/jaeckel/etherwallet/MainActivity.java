@@ -30,7 +30,6 @@ import com.jaeckel.geth.json.EthSyncingResult;
 import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
-import com.novoda.notils.logger.simple.Log;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 
 import rx.Observable;
@@ -39,6 +38,7 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         public void onServiceConnected(ComponentName className,
                                        IBinder binder) {
-            Log.d("onServiceConnected()");
+            Timber.d("onServiceConnected()");
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
@@ -68,19 +68,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<EthSyncingResponse>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("onCompleted()");
+                            Timber.d("onCompleted()");
                             ethSyncing.setText("Syncing: DONE");
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
+                            Timber.e(e, "onError(): ");
                             highestBlock.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(EthSyncingResponse ethSyncingResponse) {
-                            Log.d("OnNext(): " + ethSyncingResponse);
+                            Timber.d("OnNext(): " + ethSyncingResponse);
 
                             EthSyncingResult result = ethSyncingResponse.result;
                             if (result != null) {
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e("Exception", e);
+                            Timber.e("Exception", e);
                         }
 
                         @Override
@@ -116,18 +116,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<NetPeerCountResponse>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("onCompleted()");
+                            Timber.d("onCompleted()");
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
+                            Timber.e(e, "onError(): ");
                             netPeerCount.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(NetPeerCountResponse netPeerCountResponse) {
-                            Log.d("onNext(): ");
+                            Timber.d("onNext(): ");
                             netPeerCount.setText("NetPeerCount: " + netPeerCountResponse.result);
                         }
                     });
@@ -147,14 +147,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<EthSyncingResponse> ethSyncingCallback = new Callback<EthSyncingResponse>() {
                         @Override
                         public void onResult(EthSyncingResponse ethSyncingResult) {
-                            Log.d("onResult(): " + ethSyncingResult);
+                            Timber.d("onResult(): " + ethSyncingResult);
                             sub.onNext(ethSyncingResult);
 //                            sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
                     while (!sub.isUnsubscribed()) {
@@ -173,14 +173,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<EthBlockNumberResponse> ethBlockNumberCallback = new Callback<EthBlockNumberResponse>() {
                         @Override
                         public void onResult(EthBlockNumberResponse ethSyncingResult) {
-                            Log.d("onResult(): " + ethSyncingResult);
+                            Timber.d("onResult(): " + ethSyncingResult);
                             sub.onNext(ethSyncingResult);
 //                            sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
                     while (!sub.isUnsubscribed()) {
@@ -199,13 +199,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<NetPeerCountResponse> netPeerCountcallback = new Callback<NetPeerCountResponse>() {
                         @Override
                         public void onResult(NetPeerCountResponse netPeerCount) {
-                            Log.d("onResult(): " + netPeerCount);
+                            Timber.d("onResult(): " + netPeerCount);
                             sub.onNext(netPeerCount);
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
 
@@ -225,14 +225,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<EthAccountsResponse> ethAccountsCallback = new Callback<EthAccountsResponse>() {
                         @Override
                         public void onResult(EthAccountsResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
+                            Timber.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
 
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<PersonalListAccountsResponse> ethAccountsCallback = new Callback<PersonalListAccountsResponse>() {
                         @Override
                         public void onResult(PersonalListAccountsResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
+                            Timber.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
 
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
 
@@ -278,14 +278,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<EthGetBalanceResponse> ethAccountsCallback = new Callback<EthGetBalanceResponse>() {
                         @Override
                         public void onResult(EthGetBalanceResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
+                            Timber.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
 
@@ -302,14 +302,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Callback<PersonalNewAccountResponse> personalNewAccount = new Callback<PersonalNewAccountResponse>() {
                         @Override
                         public void onResult(PersonalNewAccountResponse ethAccountsResponse) {
-                            Log.d("onResult(): " + ethAccountsResponse);
+                            Timber.d("onResult(): " + ethAccountsResponse);
                             sub.onNext(ethAccountsResponse);
                             sub.onCompleted();
                         }
 
                         @Override
                         public void onError(JSONRPC2Error error) {
-                            Log.d("onError(): " + error);
+                            Timber.d("onError(): " + error);
                         }
                     };
 
@@ -338,24 +338,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("onClick()");
+                Timber.d("onClick()");
                 ethAccountsObservable.subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Observer<EthAccountsResponse>() {
                             @Override
                             public void onCompleted() {
-                                Log.d("onCompleted()");
+                                Timber.d("onCompleted()");
                             }
 
                             @Override
                             public void onError(Throwable e) {
-                                Log.e(e, "onError(): ");
+                                Timber.e(e, "onError(): ");
                                 ethBalance.setText("ERROR: " + e.getMessage());
                             }
 
                             @Override
                             public void onNext(EthAccountsResponse ethAccountsResponse) {
-                                Log.d("onNext(): ethAccountsResponse: " + ethAccountsResponse);
+                                Timber.d("onNext(): ethAccountsResponse: " + ethAccountsResponse);
                                 ethBalance.setText("Balances: " + ethAccountsResponse.result);
                             }
                         });
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @NonNull
     private String getChainDataDir() {
-        Log.d("absolutePath: " + getFilesDir().getAbsolutePath());
+        Timber.d("absolutePath: " + getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -428,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<PersonalListAccountsResponse>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("onCompleted()");
+                            Timber.d("onCompleted()");
 
                             ethGetBalanceRespnseObservable.subscribeOn(Schedulers.newThread())
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -445,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                         @Override
                                         public void onNext(EthGetBalanceResponse ethGetBalanceResponse) {
-                                            Log.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
+                                            Timber.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
                                             ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse.result));
                                         }
                                     });
@@ -453,13 +453,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
+                            Timber.e(e, "onError(): ");
                             ethBalance.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(PersonalListAccountsResponse personalListAccountsResponse) {
-                            Log.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
+                            Timber.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
                             ethAccount.setText("Balances: " + personalListAccountsResponse.accounts.get(0));
                         }
                     });
@@ -472,18 +472,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<PersonalNewAccountResponse>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("onCompleted()");
+                            Timber.d("onCompleted()");
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
+                            Timber.e(e, "onError(): ");
                             ethBalance.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(PersonalNewAccountResponse response) {
-                            Log.d("onNext(): response: " + response);
+                            Timber.d("onNext(): response: " + response);
                             ethBalance.setText("Balances: " + response.toString());
                         }
                     });
@@ -524,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("onResume()");
+        Timber.d("onResume()");
         Intent intent = new Intent(this, GethService.class);
         bindService(intent, mConnection,
                     Context.BIND_AUTO_CREATE
@@ -534,12 +534,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("onPause()");
+        Timber.d("onPause()");
 
-        Log.d("netPeerCountSubscription.unsubscribe();");
+        Timber.d("netPeerCountSubscription.unsubscribe();");
         netPeerCountSubscription.unsubscribe();
 
-        Log.d("ethSyncingSubscription.unsubscribe();");
+        Timber.d("ethSyncingSubscription.unsubscribe();");
         ethSyncingSubscription.unsubscribe();
         ethBlockNumberSubscription.unsubscribe();
 

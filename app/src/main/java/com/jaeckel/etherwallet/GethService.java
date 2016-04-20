@@ -18,9 +18,10 @@ import com.jaeckel.geth.json.NetPeerCountResponse;
 import com.jaeckel.geth.json.PersonalListAccountsResponse;
 import com.jaeckel.geth.json.PersonalNewAccountResponse;
 import com.jaeckel.geth.json.PersonalUnlockAccountResponse;
-import com.novoda.notils.logger.simple.Log;
 
 import java.io.IOException;
+
+import timber.log.Timber;
 
 public class GethService extends Service implements EthereumJsonRpc {
 
@@ -30,14 +31,14 @@ public class GethService extends Service implements EthereumJsonRpc {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d("onBind()");
+        Timber.d("onBind()");
         return mBinder;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("onCreate()");
+        Timber.d("onCreate()");
         gethConnector = new GethConnector();
 
         initGeth();
@@ -45,16 +46,16 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("onStartCommand()");
+        Timber.d("onStartCommand()");
         return super.onStartCommand(intent, flags, startId);
     }
 
     private void initGeth() {
-        Log.d("initGeth()...");
+        Timber.d("initGeth()...");
 
         new Thread(new Runnable() {
             public void run() {
-                Log.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
+                Timber.d("absolutePath: " + getChainDataDir()); //data/data/org.ethereum.droidwallet/files
 
                 if (BuildConfig.ETH_NETWORK.equals("testnet")) {
 
@@ -83,7 +84,7 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @NonNull
     private String getChainDataDir() {
-        Log.d("-> absolutePath: " + getFilesDir().getAbsolutePath());
+        Timber.d("-> absolutePath: " + getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -168,14 +169,14 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d("onUnbind()");
+        Timber.d("onUnbind()");
         //TODO: Kill Geth
         return super.onUnbind(intent);
     }
 
     @Override
     public void onDestroy() {
-        Log.d("onDestroy()");
+        Timber.d("onDestroy()");
         super.onDestroy();
     }
 }
