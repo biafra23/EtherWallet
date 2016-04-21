@@ -20,7 +20,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.jaeckel.geth.json.EthSyncingResult;
-import com.novoda.notils.logger.simple.Log;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,6 +30,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         public void onServiceConnected(ComponentName className,
                                        IBinder binder) {
-            Log.d("onServiceConnected()");
+            Timber.d("onServiceConnected()");
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();
 
@@ -59,19 +59,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<EthSyncingResult>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("onCompleted()");
+                            Timber.d("onCompleted()");
                             ethSyncing.setText("Syncing: DONE");
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "onError(): ");
+                            Timber.e(e, "onError(): ");
                             highestBlock.setText("ERROR: " + e.getMessage());
                         }
 
                         @Override
                         public void onNext(EthSyncingResult result) {
-                            Log.d("OnNext(): " + result);
+                            Timber.d("OnNext(): " + result);
 
                             if (result != null) {
                                 highestBlock.setText("Highest Block: " + result.highestBlock);
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e("Exception", e);
+                            Timber.e(e, "Exception");
                         }
 
                         @Override
@@ -106,18 +106,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .subscribe(new Observer<Long>() {
                         @Override
                         public void onCompleted() {
-                            Log.d("----> onCompleted()");
+                            Timber.d("onCompleted()");
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.e(e, "----> onError(): ");
+                            Timber.e(e, "onError(): ");
                             netPeerCount.setText("ERROR: " + e.getMessage());
                         }
 
-                        @Override
                         public void onNext(Long netPeerCountResponse) {
-                            Log.d("----> onNext(): ");
+                            Timber.d("----> onNext(): ");
                             netPeerCount.setText("NetPeerCount: " + netPeerCountResponse);
                         }
                     });
@@ -150,24 +149,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.d("onClick()");
+                    Timber.d("onClick()");
                     gethService.ethAccounts().subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Observer<List<String>>() {
                                 @Override
                                 public void onCompleted() {
-                                    Log.d("onCompleted()");
+                                    Timber.d("onCompleted()");
                                 }
 
                                 @Override
                                 public void onError(Throwable e) {
-                                    Log.e(e, "onError(): ");
+                                    Timber.e(e, "onError(): ");
                                     ethBalance.setText("ERROR: " + e.getMessage());
                                 }
 
                                 @Override
                                 public void onNext(List<String> ethAccounts) {
-                                    Log.d("onNext(): ethAccounts: " + ethAccounts);
+                                    Timber.d("onNext(): ethAccounts: " + ethAccounts);
                                     ethBalance.setText("Balances: " + ethAccounts);
                                 }
                             });
@@ -186,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @NonNull
     private String getChainDataDir() {
-        Log.d("absolutePath: " + getFilesDir().getAbsolutePath());
+        Timber.d("absolutePath: " + getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -237,18 +236,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new Observer<String>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("onCompleted()");
+                        Timber.d("onCompleted()");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(e, "onError(): ");
+                        Timber.e(e, "onError(): ");
                         ethBalance.setText("ERROR: " + e.getMessage());
                     }
 
                     @Override
                     public void onNext(String response) {
-                        Log.d("onNext(): response: " + response);
+                        Timber.d("onNext(): response: " + response);
                         ethBalance.setText("Balances: " + response);
                     }
                 });
@@ -266,18 +265,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onCompleted() {
-                        Log.d("sum: " + sum);
+                        Timber.d("onCompleted()");
                         ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(e, "onError(): ");
+                        Timber.e(e, "onError(): ");
                     }
 
                     @Override
                     public void onNext(BigInteger bigInteger) {
-                        Log.d("bigInteger: " + bigInteger);
+                        Timber.d("onNext(): response: " + bigInteger);
                         sum = sum.add(bigInteger);
                         ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
                     }
@@ -342,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("onResume()");
+        Timber.d("onResume()");
         Intent intent = new Intent(this, GethService.class);
         bindService(intent, mConnection,
                     Context.BIND_AUTO_CREATE
@@ -352,12 +351,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("onPause()");
+        Timber.d("onPause()");
 
-        Log.d("netPeerCountSubscription.unsubscribe();");
+        Timber.d("netPeerCountSubscription.unsubscribe();");
         netPeerCountSubscription.unsubscribe();
 
-        Log.d("ethSyncingSubscription.unsubscribe();");
+        Timber.d("ethSyncingSubscription.unsubscribe();");
         ethSyncingSubscription.unsubscribe();
         ethBlockNumberSubscription.unsubscribe();
 
