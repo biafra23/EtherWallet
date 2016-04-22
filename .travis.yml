@@ -14,4 +14,4 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.m2
 
-script: ./gradlew clean assembleMordenDebug
+script: ./gradlew clean check assembleMordenDebug
