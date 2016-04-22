@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onCompleted() {
                             Timber.d("onCompleted()");
-                            ethSyncing.setText("Syncing: DONE");
+                            ethSyncing.setText(R.string.msg_syncing_done);
                         }
 
                         @Override
@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             EthSyncingResult result = ethSyncingResponse.result;
                             if (result != null) {
                                 highestBlock.setText(format(Locale.ENGLISH, "Highest Block: %d", result.highestBlock));
-                                ethSyncing.setText("Syncing: true");
+                                ethSyncing.setText(R.string.msg_syncing_true);
                             } else {
-                                ethSyncing.setText("Syncing: false");
+                                ethSyncing.setText(R.string.msg_syncing_false);
                             }
                         }
                     });
@@ -354,13 +354,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             @Override
                             public void onError(Throwable e) {
                                 Timber.e(e, "onError(): ");
-                                ethBalance.setText(String.format("ERROR: %s", e.getMessage()));
+                                ethBalance.setText(format("ERROR: %s", e.getMessage()));
                             }
 
                             @Override
                             public void onNext(EthAccountsResponse ethAccountsResponse) {
-                                Timber.d(String.format("onNext(): ethAccountsResponse: %s", ethAccountsResponse));
-                                ethBalance.setText("Balances: " + ethAccountsResponse.result);
+                                Timber.d("onNext(): ethAccountsResponse: %s", ethAccountsResponse);
+                                ethBalance.setText(format("Balances: %s", ethAccountsResponse.result));
                             }
                         });
 
@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @NonNull
     private String getChainDataDir() {
-        Timber.d("absolutePath: " + getFilesDir().getAbsolutePath());
+        Timber.d("absolutePath: %s", getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -449,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                         @Override
                                         public void onNext(EthGetBalanceResponse ethGetBalanceResponse) {
-                                            Timber.i("ethGetBalanceResponse: " + ethGetBalanceResponse);
+                                            Timber.i("ethGetBalanceResponse: %s", ethGetBalanceResponse);
                                             ethBalance.setText(EtherFormatter.formatWeiAsEther(ethGetBalanceResponse.result));
                                         }
                                     });
@@ -458,13 +458,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(Throwable e) {
                             Timber.e(e, "onError(): ");
-                            ethBalance.setText("ERROR: " + e.getMessage());
+                            ethBalance.setText(format("ERROR: %s", e.getMessage()));
                         }
 
                         @Override
                         public void onNext(PersonalListAccountsResponse personalListAccountsResponse) {
-                            Timber.d("onNext(): personalListAccountsResponse: " + personalListAccountsResponse);
-                            ethAccount.setText("Balances: " + personalListAccountsResponse.accounts.get(0));
+                            Timber.d("onNext(): personalListAccountsResponse: %s", personalListAccountsResponse);
+                            ethAccount.setText(format("Balances: %s", personalListAccountsResponse.accounts.get(0)));
                         }
                     });
             return true;
@@ -482,13 +482,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(Throwable e) {
                             Timber.e(e, "onError(): ");
-                            ethBalance.setText("ERROR: " + e.getMessage());
+                            ethBalance.setText(format("ERROR: %s", e.getMessage()));
                         }
 
                         @Override
                         public void onNext(PersonalNewAccountResponse response) {
-                            Timber.d("onNext(): response: " + response);
-                            ethBalance.setText("Balances: " + response.toString());
+                            Timber.d("onNext(): response: %s",response);
+                            ethBalance.setText(format("Balances: %s", response.toString()));
                         }
                     });
 

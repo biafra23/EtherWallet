@@ -1,5 +1,6 @@
 package com.jaeckel.etherwallet.util;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 import java.util.Locale;
@@ -26,6 +27,7 @@ public class DebugTree extends Timber.Tree {
      * {@inheritDoc}
      */
     @Override
+    @SuppressLint(value="LogNotTimber")
     protected void log(int priority, String tag, String message, Throwable t) {
 
         Thread currentThread = Thread.currentThread();

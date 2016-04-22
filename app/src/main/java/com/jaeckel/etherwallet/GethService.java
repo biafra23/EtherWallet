@@ -55,7 +55,7 @@ public class GethService extends Service implements EthereumJsonRpc {
 
         new Thread(new Runnable() {
             public void run() {
-                Timber.d(String.format("absolutePath: %s", getChainDataDir())); //data/data/org.ethereum.droidwallet/files
+                Timber.d("absolutePath: %s", getChainDataDir()); //data/data/org.ethereum.droidwallet/files
 
                 if (BuildConfig.ETH_NETWORK.equals("testnet")) {
 
@@ -84,7 +84,7 @@ public class GethService extends Service implements EthereumJsonRpc {
 
     @NonNull
     private String getChainDataDir() {
-        Timber.d(String.format("-> absolutePath: %s", getFilesDir().getAbsolutePath()));
+        Timber.d("-> absolutePath: %s", getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 

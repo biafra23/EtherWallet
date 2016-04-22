@@ -3,4 +3,5 @@
   <issue id="InvalidPackage">
     <ignore path="**/okio-1.6.0.jar" />
   </issue>
+  <issue id="GoogleAppIndexingWarning" severity="ignore" />
 </lint>
