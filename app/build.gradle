@@ -33,6 +33,11 @@ android {
         mainnet {
             buildConfigField 'String', 'ETH_NETWORK', '"mainnet"'
         }
+        none {
+            applicationIdSuffix ".none"
+            buildConfigField 'String', 'ETH_NETWORK', '"none"'
+
+        }
     }
 }
 

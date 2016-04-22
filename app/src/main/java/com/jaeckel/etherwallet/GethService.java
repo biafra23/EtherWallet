@@ -60,10 +60,12 @@ public class GethService extends Service implements EthereumJsonRpc {
                                      "--fast --datadir=" + getChainDataDir());
                     throw new RuntimeException("geth (testnet) crashed");
 
-                } else {
+                } else if (BuildConfig.ETH_NETWORK.equals("mainnet")) {
                     Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
                     //Never reached
 
+                } else if (BuildConfig.ETH_NETWORK.equals("none")) {
+                    Timber.i("Do not run Geth");
                 }
             }
         }).start();
