@@ -15,3 +15,4 @@ cache:
     - $HOME/.m2
 
 script: ./gradlew clean check assembleMordenDebug
+after_failure: cat /home/travis/build/biafra23/EtherWallet/app/build/outputs/lint-results-mainnetDebug.html
