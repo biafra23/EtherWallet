@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         @Override
                         public void onError(Throwable e) {
-                            Timber.e("Exception", e);
+                            Timber.e(e, "Exception");
                         }
 
                         @Override
