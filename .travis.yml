@@ -5,7 +5,8 @@ android:
     # use the latest revision of Android SDK Tools
     # - platform-tools
     # - tools
-    - build-tools-23.0.0
+    # - build-tools-23.0.0
+    - build-tools-23.0.3
     - android-23
     # - android-L
     # - add-on
@@ -18,15 +19,15 @@ android:
     # - android-21
 
     # Additional components
-    - extra-google-google_play_services
+    # - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
-    - addon-google_apis-google-21
+    # - addon-google_apis-google-21
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-21
-    - sys-img-x86-android-21
+    #- sys-img-armeabi-v7a-android-21
+    #- sys-img-x86-android-21
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -34,5 +35,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    # - $HOME/.m2
 
 script: ./gradlew assembleMordenDebug
