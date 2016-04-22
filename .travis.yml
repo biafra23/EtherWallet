@@ -5,11 +5,11 @@ android:
     # use the latest revision of Android SDK Tools
     # - platform-tools
     # - tools
-    - build-tools-23.0.2
+    - build-tools-23.0.0
     - android-23
-    - android-L
-    - add-on
-    - extra
+    # - android-L
+    # - add-on
+    # - extra
 
     # The BuildTools version used by your project
     # - build-tools-21.1.2
