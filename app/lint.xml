@@ -4,4 +4,6 @@
     <ignore path="**/okio-1.6.0.jar" />
   </issue>
   <issue id="GoogleAppIndexingWarning" severity="ignore" />
+  <!-- because: lint on travis-ci -->
+  <issue id="NewApi" severity="ignore" />
 </lint>
