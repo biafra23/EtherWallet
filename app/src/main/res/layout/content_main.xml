@@ -18,37 +18,37 @@
     android:id="@+id/net_peer_count"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Peercount: ?" />
+    android:text="@string/msg_peercount" />
 
   <TextView
     android:id="@+id/eth_current_block"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Current block: ?"
+    android:text="@string/msg_current_block"
     />
 
   <TextView
     android:id="@+id/highest_block"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Highest block: ?" />
+    android:text="@string/msg_highest_block" />
 
   <TextView
     android:id="@+id/eth_syncing"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Syncing: ?" />
+    android:text="@string/msg_syncing" />
 
   <TextView
     android:id="@+id/account"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Account: ?" />
+    android:text="@string/msg_account" />
 
   <TextView
     android:id="@+id/balances"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Balances: ?" />
+    android:text="@string/msg_balances" />
 
 </LinearLayout>

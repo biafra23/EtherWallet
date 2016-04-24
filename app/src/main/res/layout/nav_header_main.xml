@@ -16,19 +16,20 @@
       android:layout_height="wrap_content"
       android:paddingTop="@dimen/nav_header_vertical_spacing"
       android:src="@android:drawable/sym_def_app_icon"
-      android:id="@+id/imageView"/>
+      android:id="@+id/imageView"
+      android:contentDescription="@string/app_icon_content_description"/>
 
   <TextView
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:paddingTop="@dimen/nav_header_vertical_spacing"
-      android:text="Android Studio"
+      android:text="@string/msg_android_studio"
       android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
   <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="android.studio@android.com"
+      android:text="@string/msg_android_studio_android_com"
       android:id="@+id/textView"/>
 
 </LinearLayout>

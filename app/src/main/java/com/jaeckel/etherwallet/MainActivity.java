@@ -23,6 +23,7 @@ import com.jaeckel.geth.json.EthSyncingResult;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
 
 import rx.Observable;
 import rx.Observer;
@@ -31,6 +32,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
+
+import static java.lang.String.format;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -60,24 +63,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onCompleted() {
                             Timber.d("onCompleted()");
-                            ethSyncing.setText("Syncing: DONE");
+                            ethSyncing.setText(R.string.msg_syncing_done);
                         }
 
                         @Override
                         public void onError(Throwable e) {
                             Timber.e(e, "onError(): ");
-                            highestBlock.setText("ERROR: " + e.getMessage());
+                            highestBlock.setText(format("ERROR: %s", e.getMessage()));
                         }
 
                         @Override
                         public void onNext(EthSyncingResult result) {
-                            Timber.d("OnNext(): " + result);
+                            Timber.d(format("OnNext(): %s", result));
 
                             if (result != null) {
-                                highestBlock.setText("Highest Block: " + result.highestBlock);
-                                ethSyncing.setText("Syncing: true");
+                                highestBlock.setText(format(Locale.ENGLISH, "Highest Block: %d", result.highestBlock));
+                                ethSyncing.setText(R.string.msg_syncing_true);
                             } else {
-                                ethSyncing.setText("Syncing: false");
+                                ethSyncing.setText(R.string.msg_syncing_false);
                             }
                         }
                     });
@@ -96,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
 
                         @Override
-                        public void onNext(Long ethBlockNumberResponse) {
-                            currentBlock.setText("Current Block: " + ethBlockNumberResponse);
+                        public void onNext(Long result) {
+                            currentBlock.setText(format(Locale.ENGLISH, "Current Block: %d", result));
                         }
                     });
 
@@ -112,12 +115,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         @Override
                         public void onError(Throwable e) {
                             Timber.e(e, "onError(): ");
-                            netPeerCount.setText("ERROR: " + e.getMessage());
+                            netPeerCount.setText(format(Locale.ENGLISH, "ERROR: %s", e.getMessage()));
                         }
 
-                        public void onNext(Long netPeerCountResponse) {
-                            Timber.d("----> onNext(): ");
-                            netPeerCount.setText("NetPeerCount: " + netPeerCountResponse);
+                        @Override
+                        public void onNext(Long result) {
+                            Timber.d("onNext(): ");
+                            netPeerCount.setText(format(Locale.ENGLISH, "NetPeerCount: %d", result));
                         }
                     });
 
@@ -127,6 +131,185 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             gethService = null;
         }
     };
+
+//    Observable<EthSyncingResponse> ethSyncingObservable = Observable.create(
+//            new Observable.OnSubscribe<EthSyncingResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super EthSyncingResponse> sub) {
+//
+//                    Callback<EthSyncingResponse> ethSyncingCallback = new Callback<EthSyncingResponse>() {
+//                        @Override
+//                        public void onResult(EthSyncingResponse ethSyncingResult) {
+//                            Timber.d("onResult(): %s", ethSyncingResult);
+//                            sub.onNext(ethSyncingResult);
+////                            sub.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d("onError(): %s", error.getMessage());
+//                        }
+//                    };
+//                    while (!sub.isUnsubscribed()) {
+//                        gethService.ethSyncing(ethSyncingCallback);
+//                        SystemClock.sleep(10000);
+//                    }
+//                }
+//            }
+//    );
+
+//    Observable<EthBlockNumberResponse> ethBlockNumberObservable = Observable.create(
+//            new Observable.OnSubscribe<EthBlockNumberResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super EthBlockNumberResponse> sub) {
+//
+//                    Callback<EthBlockNumberResponse> ethBlockNumberCallback = new Callback<EthBlockNumberResponse>() {
+//                        @Override
+//                        public void onResult(EthBlockNumberResponse ethSyncingResult) {
+//                            Timber.d("onResult(): %s", ethSyncingResult);
+//                            sub.onNext(ethSyncingResult);
+////                            sub.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d("onError(): %s", error.getMessage());
+//                        }
+//                    };
+//                    while (!sub.isUnsubscribed()) {
+//                        gethService.ethBlockNumber(ethBlockNumberCallback);
+//                        SystemClock.sleep(2000);
+//                    }
+//                }
+//            }
+//    );
+
+//    Observable<NetPeerCountResponse> netPeerCountObservable = Observable.create(
+//            new Observable.OnSubscribe<NetPeerCountResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super NetPeerCountResponse> sub) {
+//
+//                    Callback<NetPeerCountResponse> netPeerCountcallback = new Callback<NetPeerCountResponse>() {
+//                        @Override
+//                        public void onResult(NetPeerCountResponse netPeerCount) {
+//                            Timber.d("onResult(): %s", netPeerCount);
+//                            sub.onNext(netPeerCount);
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d("onError(): %s", error.getMessage());
+//                        }
+//                    };
+//
+//                    while (!sub.isUnsubscribed()) {
+//                        gethService.netPeerCount(netPeerCountcallback);
+//                        SystemClock.sleep(2000);
+//                    }
+//                }
+//            }
+//    );
+
+//    Observable<EthAccountsResponse> ethAccountsObservable = Observable.create(
+//            new Observable.OnSubscribe<EthAccountsResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super EthAccountsResponse> sub) {
+//
+//                    Callback<EthAccountsResponse> ethAccountsCallback = new Callback<EthAccountsResponse>() {
+//                        @Override
+//                        public void onResult(EthAccountsResponse ethAccountsResponse) {
+//                            Timber.d("onResult(): %s", ethAccountsResponse);
+//                            sub.onNext(ethAccountsResponse);
+//                            sub.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d("onError(): %s", error.getMessage());
+//                        }
+//                    };
+//
+//                    gethService.ethAccounts(ethAccountsCallback);
+//                }
+//            }
+//    );
+
+//    Observable<PersonalListAccountsResponse> personalListAccountsObservable = Observable.create(
+//            new Observable.OnSubscribe<PersonalListAccountsResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super PersonalListAccountsResponse> sub) {
+//
+//                    Callback<PersonalListAccountsResponse> ethAccountsCallback = new Callback<PersonalListAccountsResponse>() {
+//                        @Override
+//                        public void onResult(PersonalListAccountsResponse ethAccountsResponse) {
+//                            Timber.d("onResult(): %s", ethAccountsResponse);
+//                            sub.onNext(ethAccountsResponse);
+//                            sub.onCompleted();
+//
+////                            ethGetBalanceRespnseObservable.subscribeOn(Schedulers.io())
+////                                    .observeOn(AndroidSchedulers.mainThread())
+////                                    .subscribe();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d("onError(): %s", error.getMessage());
+//                        }
+//                    };
+//
+//                    gethService.personalListAccounts(ethAccountsCallback);
+//
+//                }
+//            }
+//    );
+
+//    Observable<EthGetBalanceResponse> ethGetBalanceRespnseObservable = Observable.create(
+//            new Observable.OnSubscribe<EthGetBalanceResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super EthGetBalanceResponse> sub) {
+//
+//                    Callback<EthGetBalanceResponse> ethAccountsCallback = new Callback<EthGetBalanceResponse>() {
+//                        @Override
+//                        public void onResult(EthGetBalanceResponse ethAccountsResponse) {
+//                            Timber.d("onResult(): %s", ethAccountsResponse);
+//                            sub.onNext(ethAccountsResponse);
+//                            sub.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d(error, "onError()");
+//                        }
+//                    };
+//
+//                    gethService.ethGetBalance("fc175d4ebc50742899821ec95275f56d33dd5cd2", "latest", ethAccountsCallback);
+//                }
+//            }
+//    );
+
+//    Observable<PersonalNewAccountResponse> personalNewAccountObservable = Observable.create(
+//            new Observable.OnSubscribe<PersonalNewAccountResponse>() {
+//                @Override
+//                public void call(final Subscriber<? super PersonalNewAccountResponse> sub) {
+//
+//                    Callback<PersonalNewAccountResponse> personalNewAccount = new Callback<PersonalNewAccountResponse>() {
+//                        @Override
+//                        public void onResult(PersonalNewAccountResponse ethAccountsResponse) {
+//                            Timber.d("onResult(): %s", ethAccountsResponse);
+//                            sub.onNext(ethAccountsResponse);
+//                            sub.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onError(JSONRPC2Error error) {
+//                            Timber.d(error, "onError()");
+//                        }
+//                    };
+//
+//                    gethService.personalNewAccount("", personalNewAccount);
+//                }
+//            }
+//    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,31 +344,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 @Override
                                 public void onError(Throwable e) {
                                     Timber.e(e, "onError(): ");
-                                    ethBalance.setText("ERROR: " + e.getMessage());
+                                    ethBalance.setText(format("ERROR: %s", e.getMessage()));
                                 }
 
                                 @Override
-                                public void onNext(List<String> ethAccounts) {
-                                    Timber.d("onNext(): ethAccounts: " + ethAccounts);
-                                    ethBalance.setText("Balances: " + ethAccounts);
+                                public void onNext(List<String> result) {
+                                    Timber.d("onNext(): ethAccountsResponse: %s", result);
+                                    ethBalance.setText(format("Balances: %s", result));
                                 }
                             });
+
                 }
             });
+
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.setDrawerListener(toggle);
+            toggle.syncState();
+
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.setNavigationItemSelectedListener(this);
+
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
     }
 
     @NonNull
     private String getChainDataDir() {
-        Timber.d("absolutePath: " + getFilesDir().getAbsolutePath());
+        Timber.d("absolutePath: %s", getFilesDir().getAbsolutePath());
         return getFilesDir().getAbsolutePath();
     }
 
@@ -242,15 +427,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onError(Throwable e) {
                         Timber.e(e, "onError(): ");
-                        ethBalance.setText("ERROR: " + e.getMessage());
+                        ethBalance.setText(format("ERROR: " + e.getMessage()));
                     }
 
                     @Override
                     public void onNext(String response) {
-                        Timber.d("onNext(): response: " + response);
-                        ethBalance.setText("Balances: " + response);
+                        Timber.d("onNext(): response: %s", response);
+                        ethBalance.setText(format("Balances: %s", response));
                     }
                 });
+
     }
 
     private void calculateBalanceForAllAccounts() {
@@ -266,19 +452,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onCompleted() {
                         Timber.d("onCompleted()");
-                        ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
+                        ethBalance.setText(format("Balance: %s", EtherFormatter.formatWeiAsEther(sum)));
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Timber.e(e, "onError(): ");
+                        ethBalance.setText(format("ERROR: %s", e.getMessage()));
                     }
 
                     @Override
                     public void onNext(BigInteger bigInteger) {
-                        Timber.d("onNext(): response: " + bigInteger);
+                        Timber.d("onNext(): response: %s", bigInteger);
                         sum = sum.add(bigInteger);
-                        ethBalance.setText("Balance: " + EtherFormatter.formatWeiAsEther(sum));
+                        ethBalance.setText(format("Balance: %s", EtherFormatter.formatWeiAsEther(sum)));
                     }
                 });
     }

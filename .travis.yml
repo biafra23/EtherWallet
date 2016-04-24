@@ -1,0 +1,18 @@
+language: android
+android:
+  components:
+    # Uncomment the lines below if you want to
+    # use the latest revision of Android SDK Tools
+    - tools
+    - build-tools-23.0.3
+    - android-23
+    - extra-android-m2repository
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.m2
+
+script: ./gradlew clean check assembleMordenDebug
+after_failure: cat /home/travis/build/biafra23/EtherWallet/app/build/outputs/lint-results-mainnetDebug.html
