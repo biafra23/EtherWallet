@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.github.ben-manes.versions'
 android {
 //  compileSdkVersion 'Google Inc.:Google APIs:23'
     compileSdkVersion 23
@@ -52,12 +52,11 @@ dependencies {
     compile 'com.android.support:support-v4:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile project(path: ':geth-connector')
-//    compile 'com.novoda:notils:2.2.16'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava-math:1.0.0'
     compile 'com.jakewharton.timber:timber:4.1.2'
 
-//    compile 'com.squareup.okhttp3:logging-interceptor:(insert latest version)'
+    compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
 
 }
 
