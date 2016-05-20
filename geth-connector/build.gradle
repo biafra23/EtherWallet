@@ -20,3 +20,6 @@ task copyTestResources(type: Copy) {
     into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources
+
+targetCompatibility = '1.7'
+sourceCompatibility = '1.7'
