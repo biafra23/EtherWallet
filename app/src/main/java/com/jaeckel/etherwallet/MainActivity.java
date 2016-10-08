@@ -61,8 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
-        public void onServiceConnected(ComponentName className,
-                                       IBinder binder) {
+        public void onServiceConnected(ComponentName className, IBinder binder) {
             Timber.d("onServiceConnected()");
             GethService.MyBinder b = (GethService.MyBinder) binder;
             gethService = b.getService();

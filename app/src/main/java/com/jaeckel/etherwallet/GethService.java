@@ -7,7 +7,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.jaeckel.geth.EthereumJsonRpc;
 import com.jaeckel.geth.GethConnector;
 import com.jaeckel.geth.json.EthAccountsResponse;
@@ -51,7 +50,7 @@ public class GethService extends Service implements EthereumJsonRpc {
     }
 
     private void initGeth() {
-        Timber.d("initGeth()...");
+        Timber.d("-> initGeth(): Network: " + BuildConfig.ETH_NETWORK + "...");
 
         new Thread(new Runnable() {
             public void run() {
@@ -59,12 +58,15 @@ public class GethService extends Service implements EthereumJsonRpc {
 
                 if (BuildConfig.ETH_NETWORK.equals("testnet")) {
 
-                    Geth.run("--testnet " +
-//                                     " --bootnodes enode://f6526c15fed808a8079debdf2284234bf511907bdf10bd8a80a99a8f635445f015d53e6f50db6deca82c8754da8d0e72188de2b31886f9fa5f5df0fc3ca5157e@[::]:30304 " +
-                                     "--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* " +
-                                     "--fast --datadir=" + getChainDataDir());
+//                    Geth.run("--testnet " +
+////                                     " --bootnodes enode://f6526c15fed808a8079debdf2284234bf511907bdf10bd8a80a99a8f635445f015d53e6f50db6deca82c8754da8d0e72188de2b31886f9fa5f5df0fc3ca5157e@[::]:30304 " +
+//                                     "--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* " +
+//                                     "--light --datadir=" + getChainDataDir());
+
+//                    Geth.run("--testnet --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
+//                    Geth.run("--testnet --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
                 } else {
-                    Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --fast --datadir=" + getChainDataDir());
+//                    Geth.run("--ipcdisable --rpcaddr 127.0.0.1 --rpcapi eth,net,personal --rpc --rpccorsdomain=* --light --datadir=" + getChainDataDir());
                     //Never reached
 
                     throw new RuntimeException("geth crashed");

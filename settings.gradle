@@ -1,1 +1,1 @@
-include ':app', ':geth-connector'
+include ':app', ':geth-connector', ':geth'

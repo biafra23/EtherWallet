@@ -45,8 +45,7 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile(name: 'geth', ext: 'aar')
+    compile project(':geth')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:support-v4:23.3.0'
@@ -56,8 +55,5 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.jakewharton.timber:timber:4.1.2'
 
-//    compile 'com.squareup.okhttp3:logging-interceptor:(insert latest version)'
-//    compile 'com.squareup.retrofit2:retrofit:2.0.0'
-//    compile 'com.segment.retrofit.jsonrpc:jsonrpc:1.0.0-SNAPSHOT'
 }
 
